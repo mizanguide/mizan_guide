@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<title>Mizan</title>
+<meta name="description" content="Bring what you are struggling with. Get a real, sourced answer back.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Karla:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light only;
+    --sage: #4A6B52;
+    --deep: #35503B;
+    --tint: #8FA890;
+    --terracotta: #C77B4D;
+    --cream: #F2EEE1;
+    --card: #FFFDF7;
+    --ink: #2A2A20;
+    --text2: #5c5347;
+    --text3: #6b6353;
+    --hairline: #ddd6c2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Karla', sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 24px; }
+
+  header.hero { padding: 64px 0 40px; text-align: center; }
+  .eyebrow {
+    font-family: 'Karla'; font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--sage); font-weight: 700; margin-bottom: 18px;
+  }
+  .wordmark {
+    font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 52px; color: var(--deep);
+    margin: 0;
+  }
+  .rule { width: 40px; height: 2px; background: var(--terracotta); margin: 16px auto 20px; border: none; }
+  .tagline {
+    font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 24px; line-height: 1.4;
+    color: var(--ink); max-width: 460px; margin: 0 auto;
+  }
+  section { padding: 36px 0; }
+  section + section { border-top: 1px solid var(--hairline); }
+
+  .what p { font-size: 16.5px; color: var(--text2); margin: 0 0 14px; }
+  .what p:last-child { margin-bottom: 0; }
+
+  h2.section-title {
+    font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 26px; color: var(--deep);
+    margin: 0 0 8px;
+  }
+
+  .proof {
+    background: var(--card); border: 2px solid var(--hairline); border-radius: 14px; padding: 24px 22px;
+  }
+  .proof .intro { font-size: 14.5px; color: var(--text3); margin-bottom: 12px; }
+  .proof .line {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 19px;
+    line-height: 1.5; color: var(--ink); margin: 0;
+  }
+  .proof .cite {
+    font-family: 'Karla'; font-weight: 700; font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--terracotta); margin-top: 14px;
+  }
+
+  .ask-list {
+    margin: 18px auto 0; padding-left: 20px; color: var(--text2); font-size: 15.5px;
+    text-align: left; max-width: 340px;
+  }
+  .ask-list li { margin-bottom: 6px; }
+
+  .cta {
+    text-align: center; padding: 40px 0 56px;
+  }
+  .cta p { font-size: 15.5px; color: var(--text2); max-width: 440px; margin: 0 auto 22px; }
+  .btn {
+    display: inline-block; background: var(--sage); color: var(--card); text-decoration: none;
+    font-family: 'Karla'; font-weight: 700; font-size: 15px; letter-spacing: 0.5px;
+    padding: 14px 32px; border-radius: 999px; border: 2px solid var(--sage); cursor: pointer;
+  }
+  .btn:hover { background: var(--deep); border-color: var(--deep); }
+  .btn:disabled { opacity: 0.6; cursor: default; }
+  .btn-ghost {
+    display: inline-block; background: transparent; color: var(--sage); text-decoration: none;
+    font-family: 'Karla'; font-weight: 700; font-size: 14px; letter-spacing: 0.3px;
+    padding: 10px 0; border-bottom: 1px solid var(--sage);
+  }
+
+  form.intake { text-align: left; max-width: 420px; margin: 0 auto; }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-family: 'Karla'; font-weight: 700; font-size: 12px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text3); margin-bottom: 6px;
+  }
+  .field .hint { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--tint); }
+  .field input, .field textarea {
+    width: 100%; font-family: 'Karla'; font-size: 15.5px; color: var(--ink);
+    background: var(--card); border: 2px solid var(--hairline); border-radius: 10px;
+    padding: 11px 14px; resize: vertical;
+  }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--sage); }
+  .field textarea { min-height: 70px; }
+  .form-note { font-size: 13.5px; color: var(--tint); margin: 4px 0 22px; }
+  .form-status { font-size: 14.5px; margin-top: 14px; min-height: 20px; }
+  .form-status.error { color: var(--terracotta); }
+  .thanks {
+    background: var(--card); border: 2px solid var(--hairline); border-radius: 14px;
+    padding: 26px 22px; max-width: 420px; margin: 0 auto;
+  }
+  .thanks .t {
+    font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 21px; color: var(--deep);
+    margin: 0 0 8px;
+  }
+  .thanks p { font-size: 15px; color: var(--text2); margin: 0; }
+
+  footer { text-align: center; padding: 28px 0 48px; }
+  footer .w { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px; color: var(--sage); }
+  footer .h { font-family: 'Karla'; font-weight: 700; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--text3); margin-top: 3px; }
+
+  @media (max-width: 480px) {
+    .wordmark { font-size: 44px; }
+    .tagline { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Bismillah</div>
+    <h1 class="wordmark">Mizan</h1>
+    <hr class="rule">
+    <p class="tagline">Bring what you are struggling with. Get a real, sourced answer back.</p>
+  </header>
+
+  <section class="proof">
+    <div class="intro">The Prophet, peace be upon him, said Allah's own words on this exact pattern:</div>
+    <p class="line">"My slave has known that he has a Lord who forgives sins and punishes for it, I therefore have forgiven my slave."</p>
+    <div class="cite">Sahih al-Bukhari 7507, Book 97, Hadith 132</div>
+  </section>
+
+
+  <section class="cta" id="cta-section">
+    <h2 class="section-title">Want it made specific to you?</h2>
+    <p>Answer whatever you are comfortable with, up to four questions. The more you share, the more we can actually personalize it instead of sending something generic. We reply by DM.</p>
+
+    <form class="intake" id="intake-form">
+      <div class="field">
+        <label for="ig">Your Instagram username <span class="hint">(so we can DM you back)</span></label>
+        <input type="text" id="ig" name="instagram" placeholder="@yourusername" required>
+      </div>
+      <div class="field">
+        <label for="email">Email <span class="hint">(optional, in case a DM does not reach you)</span></label>
+        <input type="email" id="email" name="email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="struggle">What is the actual struggle</label>
+        <textarea id="struggle" name="struggle" placeholder="Whatever you're comfortable sharing"></textarea>
+      </div>
+      <div class="field">
+        <label for="timing">Does it hit at a specific time, or does it feel random</label>
+        <input type="text" id="timing" name="timing">
+      </div>
+      <div class="field">
+        <label for="duration">How long has this been going on</label>
+        <input type="text" id="duration" name="duration">
+      </div>
+      <div class="field">
+        <label for="tried">What have you already tried, if anything</label>
+        <input type="text" id="tried" name="tried">
+      </div>
+      <div class="field">
+        <label for="more">Anything else you want to add <span class="hint">(optional, not everyone fits the questions above)</span></label>
+        <textarea id="more" name="more" placeholder="Anything the questions above didn't cover"></textarea>
+      </div>
+      <p class="form-note">Only we can see what you send here. Nothing is posted or shared.</p>
+      <button type="submit" class="btn" id="submit-btn">Send it to us</button>
+      <div class="form-status" id="form-status"></div>
+    </form>
+
+    <div class="thanks" id="thanks-card" hidden>
+      <div class="t">Got it.</div>
+      <p>We read every one of these ourselves. Expect a DM from us soon, not an autoreply.</p>
+    </div>
+
+    <p style="margin-top:26px;"><a class="btn-ghost" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
+  </section>
+
+  <footer>
+    <div class="w">Mizan</div>
+    <div class="h">@mizan.guide</div>
+  </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  // Public anon key only. This key can ONLY insert rows into mizan_leads (see the RLS
+  // policy Anas runs in Supabase), it cannot read, update, or delete anything. Never put
+  // the service_role secret key here, this file is served from a public repo.
+  const SUPABASE_URL = 'https://wxwuxajfnefabiipgptx.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d3V4YWpmbmVmYWJpaXBncHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NjE3MjAsImV4cCI6MjEwNDMzNzcyMH0.3OiKcmOfX4KCp-OjaHdBIo7HJeMUjX_XozxlhUF-3fA';
+
+  // Email notification on new submission, via EmailJS (client-side, no backend, free tier).
+  // All three values below are safe to expose publicly, same category as the Supabase anon key
+  // (EmailJS's own public key is designed for this, it cannot send arbitrary email, only
+  // through the one template you configure). Fill these in from your EmailJS account
+  // (Account > General for the public key, Email Services for the service ID, Email Templates
+  // for the template ID) to turn notifications on. Left blank, the form still works, it just
+  // won't email you, submissions still land in Supabase either way.
+  const EMAILJS_PUBLIC_KEY = '';
+  const EMAILJS_SERVICE_ID = '';
+  const EMAILJS_TEMPLATE_ID = '';
+  if (EMAILJS_PUBLIC_KEY) emailjs.init(EMAILJS_PUBLIC_KEY);
+
+  const form = document.getElementById('intake-form');
+  const statusEl = document.getElementById('form-status');
+  const submitBtn = document.getElementById('submit-btn');
+  const thanksCard = document.getElementById('thanks-card');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusEl.textContent = '';
+    statusEl.classList.remove('error');
+    const ig = document.getElementById('ig').value.trim();
+    if (!ig) {
+      statusEl.textContent = 'Instagram username is required so we can reply.';
+      statusEl.classList.add('error');
+      return;
+    }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+
+    const payload = {
+      instagram: ig,
+      email: document.getElementById('email').value.trim() || null,
+      struggle: document.getElementById('struggle').value.trim() || null,
+      timing: document.getElementById('timing').value.trim() || null,
+      duration: document.getElementById('duration').value.trim() || null,
+      tried: document.getElementById('tried').value.trim() || null,
+      more: document.getElementById('more').value.trim() || null,
+      source_path: location.pathname,
+    };
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/mizan_leads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Request failed: ' + res.status);
+
+      // Best-effort email notification. Never blocks or fails the actual submission,
+      // the Supabase row is already saved by this point regardless of what happens here.
+      if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          instagram: payload.instagram,
+          email: payload.email || 'not given',
+          struggle: payload.struggle || 'not given',
+          timing: payload.timing || 'not given',
+          duration: payload.duration || 'not given',
+          tried: payload.tried || 'not given',
+          more: payload.more || 'not given',
+        }).catch(() => {});
+      }
+
+      form.hidden = true;
+      thanksCard.hidden = false;
+    } catch (err) {
+      statusEl.textContent = 'Something went wrong sending this. Please DM us instead for now.';
+      statusEl.classList.add('error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send it to us';
+    }
+  });
+</script>
+
+</body>
+</html>
