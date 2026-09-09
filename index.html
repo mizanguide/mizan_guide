@@ -22,6 +22,13 @@
     --text2: #5c5347;
     --text3: #6b6353;
     --hairline: #ddd6c2;
+    /* Spacing scale, same discipline as the reel system: gap SIZE encodes proximity.
+       Small gaps group elements that are the same beat, larger gaps mark a new beat. */
+    --sp-1: 8px;   /* label-to-input, quote-to-citation: same element, two parts */
+    --sp-2: 16px;  /* same-beat pairing: field-to-field, heading-to-subhead */
+    --sp-3: 24px;  /* related but distinct beat: proof card to the offer line under it */
+    --sp-4: 40px;  /* a new beat starts */
+    --sp-6: 64px;  /* top-level separation: hero, then everything after it */
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -33,55 +40,70 @@
   }
   .wrap { max-width: 640px; margin: 0 auto; padding: 0 24px; }
 
-  header.hero { padding: 64px 0 40px; text-align: center; }
+  /* Beat 1: brand + value prop. Internal spacing tight (one idea, three parts),
+     sp-6 clears before the next beat so the hero keeps its own room. */
+  header.hero { padding-top: 56px; text-align: center; }
   .eyebrow {
     font-family: 'Karla'; font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
-    color: var(--sage); font-weight: 700; margin-bottom: 18px;
+    color: var(--sage); font-weight: 700; margin-bottom: var(--sp-2);
   }
   .wordmark {
     font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 52px; color: var(--deep);
     margin: 0;
   }
-  .rule { width: 40px; height: 2px; background: var(--terracotta); margin: 16px auto 20px; border: none; }
+  .rule { width: 40px; height: 2px; background: var(--terracotta); margin: var(--sp-2) auto; border: none; }
   .hl { color: var(--terracotta); }
   .tagline {
-    font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 24px; line-height: 1.4;
+    font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 26px; line-height: 1.4;
     color: var(--ink); max-width: 460px; margin: 0 auto;
   }
-  section { padding: 36px 0; }
-  section + section { border-top: 1px solid var(--hairline); }
 
-  .what p { font-size: 16.5px; color: var(--text2); margin: 0 0 14px; }
-  .what p:last-child { margin-bottom: 0; }
+  main { padding-bottom: 56px; }
 
-  h2.section-title {
-    font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 26px; color: var(--deep);
-    margin: 0 0 8px;
-  }
-
+  /* Beat 2: proof. A new idea from the hero, sp-6 before it; the citation label sits
+     right under its own quote at sp-1, same element, not a new beat. */
   .proof {
     background: var(--card); border: 2px solid var(--hairline); border-radius: 14px; padding: 24px 22px;
+    margin-top: var(--sp-6);
   }
-  .proof .intro { font-size: 14.5px; color: var(--text3); margin-bottom: 12px; }
+  .proof .intro { font-size: 14.5px; color: var(--text3); margin-bottom: var(--sp-2); }
   .proof .line {
     font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 19px;
     line-height: 1.5; color: var(--ink); margin: 0;
   }
   .proof .cite {
     font-family: 'Karla'; font-weight: 700; font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--terracotta); margin-top: 14px;
+    color: var(--terracotta); margin-top: var(--sp-1);
   }
 
-  .ask-list {
-    margin: 18px auto 0; padding-left: 20px; color: var(--text2); font-size: 15.5px;
-    text-align: left; max-width: 340px;
+  /* Beat 3: the offer. Kept closer to the proof (sp-3) than a full new-beat gap, on
+     purpose, the citation is what earns the offer its trust, they read as one thought.
+     No box: the last plan card competed visually with the proof card above it and read
+     as clutter. Emphasis comes from contrast and scale instead of a second border. */
+  .offer {
+    text-align: center; max-width: 460px; margin: var(--sp-3) auto 0;
   }
-  .ask-list li { margin-bottom: 6px; }
+  .offer .label {
+    font-family: 'Karla'; font-weight: 700; font-size: 11.5px; letter-spacing: 2.2px;
+    text-transform: uppercase; color: var(--sage); margin-bottom: var(--sp-1);
+  }
+  .offer .line {
+    font-size: 16.5px; line-height: 1.55; color: var(--ink); margin: 0;
+  }
+  .offer .price {
+    font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 22px; color: var(--terracotta);
+  }
+  .offer .fallback { font-size: 14px; color: var(--text3); margin: var(--sp-1) 0 0; }
 
-  .cta {
-    text-align: center; padding: 40px 0 56px;
+  /* Beat 4: the action. A full new beat, sp-6 clears before it. Heading and its one-line
+     subhead are the same beat (sp-1); the subhead-to-form gap is sp-3, a related but
+     distinct step (reading versus doing). */
+  .cta { text-align: center; margin-top: var(--sp-6); }
+  h2.section-title {
+    font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 23px; color: var(--deep);
+    margin: 0 0 var(--sp-1);
   }
-  .cta p { font-size: 15.5px; color: var(--text2); max-width: 440px; margin: 0 auto 22px; }
+  .cta > p { font-size: 15.5px; color: var(--text2); max-width: 440px; margin: 0 auto; }
   .btn {
     display: inline-block; background: var(--sage); color: var(--card); text-decoration: none;
     font-family: 'Karla'; font-weight: 700; font-size: 15px; letter-spacing: 0.5px;
@@ -95,11 +117,15 @@
     padding: 10px 0; border-bottom: 1px solid var(--sage);
   }
 
-  form.intake { text-align: left; max-width: 420px; margin: 0 auto; }
-  .field { margin-bottom: 16px; }
+  /* The form is the one deliberate break from center alignment: input fields read left
+     to right, centering them would hurt usability, not help balance. The heading above
+     stays centered so the shift into the form still feels announced, not abrupt, and
+     the form's own max-width keeps it centered as a block on the page. */
+  form.intake { text-align: left; max-width: 420px; margin: var(--sp-4) auto 0; }
+  .field { margin-bottom: var(--sp-2); }
   .field label {
     display: block; font-family: 'Karla'; font-weight: 700; font-size: 12px; letter-spacing: 1px;
-    text-transform: uppercase; color: var(--text3); margin-bottom: 6px;
+    text-transform: uppercase; color: var(--text3); margin-bottom: var(--sp-1);
   }
   .field .hint { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--tint); }
   .field input, .field textarea {
@@ -109,31 +135,30 @@
   }
   .field input:focus, .field textarea:focus { outline: none; border-color: var(--sage); }
   .field textarea { min-height: 70px; }
-  .form-note { font-size: 13.5px; color: var(--tint); margin: 4px 0 22px; }
-  .form-status { font-size: 14.5px; margin-top: 14px; min-height: 20px; }
+  .form-note { font-size: 13.5px; color: var(--tint); margin: var(--sp-1) 0 var(--sp-3); }
+  .form-status { font-size: 14.5px; margin-top: var(--sp-2); min-height: 20px; }
   .form-status.error { color: var(--terracotta); }
   .thanks {
     background: var(--card); border: 2px solid var(--hairline); border-radius: 14px;
-    padding: 26px 22px; max-width: 420px; margin: 0 auto;
+    padding: 26px 22px; max-width: 420px; margin: var(--sp-4) auto 0;
   }
   .thanks .t {
     font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 21px; color: var(--deep);
-    margin: 0 0 8px;
+    margin: 0 0 var(--sp-1);
   }
   .thanks p { font-size: 15px; color: var(--text2); margin: 0; }
 
-  .offer-line {
-    text-align: center; font-size: 16px; color: var(--text2); max-width: 480px; margin: 0 auto;
-  }
-  .offer-line .price { color: var(--terracotta); font-weight: 700; }
+  .fallback-link { margin-top: var(--sp-3); text-align: center; }
 
-  footer { text-align: center; padding: 28px 0 48px; }
+  /* Beat 5: footer. Its own beat, sp-6 clears, quietest type on the page (small caps,
+     tertiary color) so nothing after the button competes with it for attention. */
+  footer { text-align: center; margin-top: var(--sp-6); padding-bottom: 48px; }
   footer .w { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px; color: var(--sage); }
   footer .h { font-family: 'Karla'; font-weight: 700; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--text3); margin-top: 3px; }
 
   @media (max-width: 480px) {
     .wordmark { font-size: 44px; }
-    .tagline { font-size: 21px; }
+    .tagline { font-size: 22px; }
   }
 </style>
 </head>
@@ -148,13 +173,19 @@
     <p class="tagline">Get your personalised plan to quit <span class="hl">porn</span>, sourced from Qur'an and Sunnah.</p>
   </header>
 
+  <main>
+
   <section class="proof">
     <div class="intro">The Prophet, peace be upon him, said Allah's own words on this exact pattern:</div>
     <p class="line">"My slave has known that he has a Lord who forgives sins and punishes for it, I therefore have forgiven my slave."</p>
     <div class="cite">Sahih al-Bukhari 7507, Book 97, Hadith 132</div>
   </section>
 
-  <p class="offer-line">Every plan is personal, built from what you tell us below. The full 14-day version is <span class="price">$9</span>. If the free one is what you need right now, just say so in your answers.</p>
+  <div class="offer">
+    <div class="label">The Offer</div>
+    <p class="line">Every plan is personal, built from what you tell us below.<br>The full 14-day version is <span class="price">$9</span>.</p>
+    <p class="fallback">If the free one is what you need right now, just say so in your answers.</p>
+  </div>
 
   <section class="cta" id="cta-section">
     <h2 class="section-title">Start your plan</h2>
@@ -199,8 +230,10 @@
       <p id="thanks-text">We read every one of these ourselves. Expect a DM from us soon, not an autoreply.</p>
     </div>
 
-    <p style="margin-top:26px;"><a class="btn-ghost" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
+    <p class="fallback-link"><a class="btn-ghost" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
   </section>
+
+  </main>
 
   <footer>
     <div class="w">Mizan</div>
