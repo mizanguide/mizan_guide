@@ -122,25 +122,10 @@
   }
   .thanks p { font-size: 15px; color: var(--text2); margin: 0; }
 
-  .plan {
-    background: var(--card); border: 2px solid var(--sage); border-radius: 14px; padding: 24px 22px;
-    text-align: center;
+  .offer-line {
+    text-align: center; font-size: 16px; color: var(--text2); max-width: 480px; margin: 0 auto;
   }
-  .plan .label {
-    font-family: 'Karla'; font-weight: 700; font-size: 11.5px; letter-spacing: 2.2px; text-transform: uppercase;
-    color: var(--sage); margin-bottom: 12px;
-  }
-  .plan .line {
-    font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 20px; line-height: 1.45;
-    color: var(--ink); margin: 0 0 8px;
-  }
-  .plan .price { color: var(--terracotta); font-weight: 700; }
-  .plan .free { font-size: 14.5px; color: var(--text3); margin: 10px 0 0; }
-  .field label.choice {
-    display: block; font-family: 'Karla'; font-weight: 400; font-size: 15.5px; text-transform: none;
-    letter-spacing: 0; color: var(--ink); margin: 6px 0; cursor: pointer;
-  }
-  .field label.choice input { width: auto; margin-right: 8px; accent-color: var(--sage); }
+  .offer-line .price { color: var(--terracotta); font-weight: 700; }
 
   footer { text-align: center; padding: 28px 0 48px; }
   footer .w { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px; color: var(--sage); }
@@ -169,24 +154,13 @@
     <div class="cite">Sahih al-Bukhari 7507, Book 97, Hadith 132</div>
   </section>
 
-  <section class="plan">
-    <div class="label">The Mizan 14-Day Plan</div>
-    <p class="line">Your personalised plan to break the cycle in 14 days, one step a day. Made from what you tell us, sourced from Qur'an and Sunnah.</p>
-    <p class="line"><span class="price">$9</span> for all 14 days.</p>
-    <p class="free">Not ready for that? Start with the free plan below, same questions.</p>
-  </section>
-
+  <p class="offer-line">Every plan is personal, built from what you tell us below. The full 14-day version is <span class="price">$9</span>. If the free one is what you need right now, just say so in your answers.</p>
 
   <section class="cta" id="cta-section">
     <h2 class="section-title">Start your plan</h2>
-    <p>Pick one, then answer whatever you are comfortable with. The more you share, the more personal the plan. We reply by DM.</p>
+    <p>Answer whatever you are comfortable with. The more you share, the more personal the plan. We reply by DM.</p>
 
     <form class="intake" id="intake-form">
-      <div class="field">
-        <label>Which plan</label>
-        <label class="choice"><input type="radio" name="plan" value="paid" checked> The 14-day plan, $9 for all 14 days</label>
-        <label class="choice"><input type="radio" name="plan" value="free"> The free plan first</label>
-      </div>
       <div class="field">
         <label for="ig">Your Instagram username <span class="hint">(so we can DM you back)</span></label>
         <input type="text" id="ig" name="instagram" placeholder="@yourusername" required>
@@ -273,16 +247,10 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending...';
 
-    // The plan choice rides inside the struggle field on purpose: the mizan_leads table has fixed
-    // columns and the anon key cannot add one, so an extra key would make the insert fail.
-    const plan = form.querySelector('input[name="plan"]:checked').value;
-    const planLabel = plan === 'paid' ? '[Chose: 14-day plan, $9]' : '[Chose: free plan]';
-    const struggleRaw = document.getElementById('struggle').value.trim();
-
     const payload = {
       instagram: ig,
       email: document.getElementById('email').value.trim() || null,
-      struggle: (planLabel + ' ' + struggleRaw).trim(),
+      struggle: document.getElementById('struggle').value.trim() || null,
       timing: document.getElementById('timing').value.trim() || null,
       duration: document.getElementById('duration').value.trim() || null,
       tried: document.getElementById('tried').value.trim() || null,
@@ -307,7 +275,6 @@
       // the Supabase row is already saved by this point regardless of what happens here.
       if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
         emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          plan: planLabel,
           instagram: payload.instagram,
           email: payload.email || 'not given',
           struggle: payload.struggle || 'not given',
@@ -318,9 +285,6 @@
         }).catch(() => {});
       }
 
-      document.getElementById('thanks-text').textContent = plan === 'paid'
-        ? 'We read every one of these ourselves. Expect a DM from us within the day with your first step and how to send the $9. Nothing is charged until you say yes.'
-        : 'We read every one of these ourselves. Expect a DM from us soon, not an autoreply.';
       form.hidden = true;
       thanksCard.hidden = false;
     } catch (err) {
