@@ -27,3 +27,33 @@ create policy "anon can insert leads"
 
 -- No select/update/delete policy for anon or authenticated on purpose.
 -- To view submissions: Supabase dashboard > Table Editor > mizan_leads.
+
+-- Analytics events (page views, section views, form start/submit, outbound clicks).
+-- Different policy on purpose: this table carries NO personal content (no struggle text,
+-- no instagram handle, no email), just event names and counts, so unlike mizan_leads it's
+-- safe to let the public anon key both insert AND read. That means Claude can query real
+-- funnel numbers directly via the anon key without needing a screenshot or a service_role
+-- key, while mizan_leads (which holds people's private disclosures) stays insert-only.
+
+create table if not exists public.mizan_events (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  event_type text not null,
+  source_path text,
+  referrer text,
+  meta jsonb
+);
+
+alter table public.mizan_events enable row level security;
+
+create policy "anon can insert events"
+  on public.mizan_events
+  for insert
+  to anon
+  with check (true);
+
+create policy "anon can read events"
+  on public.mizan_events
+  for select
+  to anon
+  using (true);

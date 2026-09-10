@@ -6,6 +6,18 @@
 <meta name="color-scheme" content="light only">
 <title>Mizan</title>
 <meta name="description" content="Get your personalised plan to quit porn, sourced from Qur'an and Sunnah.">
+
+<!-- Google Analytics 4. Set up under the mizan.guide account, never Anas's personal one.
+     Replace G-XXXXXXXXXX with the real Measurement ID once the GA4 property exists. Until
+     then this loads gtag.js but sends events nowhere real, harmless, not an error. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Karla:wght@400;600;700&display=swap" rel="stylesheet">
@@ -174,13 +186,13 @@
 
   <main>
 
-  <section class="proof">
+  <section class="proof" id="proof-section">
     <div class="intro">The Prophet, peace be upon him, said Allah's own words on this exact pattern:</div>
     <p class="line">"My slave has known that he has a Lord who forgives sins and punishes for it, I therefore have forgiven my slave."</p>
     <div class="cite">Sahih al-Bukhari 7507, Book 97, Hadith 132</div>
   </section>
 
-  <div class="offer">
+  <div class="offer" id="offer-section">
     <div class="label">How It Works</div>
     <p class="line">This isn't a document you read once. Every day for 14 days, we send you one real step, you tell us how it actually went, and the next step is built from that, not a fixed script.</p>
     <p class="line" style="margin-top: var(--sp-2);"><span class="price">$5</span> for all 14 days.</p>
@@ -229,7 +241,7 @@
       <p id="thanks-text">We read every one of these ourselves. Expect a DM from us soon, not an autoreply, with your first step and how to send the $5.</p>
     </div>
 
-    <p class="fallback-link"><a class="btn-ghost" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
+    <p class="fallback-link"><a class="btn-ghost" id="dm-fallback-link" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
   </section>
 
   </main>
@@ -261,10 +273,65 @@
   const EMAILJS_TEMPLATE_ID = 'template_9kl5nrd';
   if (EMAILJS_PUBLIC_KEY) emailjs.init(EMAILJS_PUBLIC_KEY);
 
+  // ---- Analytics: logs to mizan_events (Claude can query this directly, anon SELECT is
+  // intentionally allowed here since events carry no personal content, unlike mizan_leads
+  // which stays insert-only) and mirrors the same events to GA4. Fire-and-forget, never
+  // blocks the actual page or form. Requires the mizan_events table, see supabase_setup.sql.
+  function logEvent(type, meta) {
+    try {
+      fetch(`${SUPABASE_URL}/rest/v1/mizan_events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          event_type: type,
+          source_path: location.pathname,
+          referrer: document.referrer || null,
+          meta: meta || null,
+        }),
+      }).catch(() => {});
+    } catch (e) {}
+    try {
+      if (window.gtag) gtag('event', type, meta || {});
+    } catch (e) {}
+  }
+
+  logEvent('page_view');
+
+  // Section-view tracking: fires once per section the first time it's actually seen,
+  // answers "how far down the page did they get" directly, not just "did they load it".
+  if ('IntersectionObserver' in window) {
+    const seen = new Set();
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !seen.has(entry.target.id)) {
+          seen.add(entry.target.id);
+          logEvent('section_view', { section: entry.target.id });
+        }
+      });
+    }, { threshold: 0.5 });
+    ['proof-section', 'offer-section', 'cta-section'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) sectionObserver.observe(el);
+    });
+  }
+
   const form = document.getElementById('intake-form');
   const statusEl = document.getElementById('form-status');
   const submitBtn = document.getElementById('submit-btn');
   const thanksCard = document.getElementById('thanks-card');
+
+  let formStarted = false;
+  form.addEventListener('focusin', () => {
+    if (!formStarted) { formStarted = true; logEvent('form_start'); }
+  });
+
+  const dmLink = document.getElementById('dm-fallback-link');
+  if (dmLink) dmLink.addEventListener('click', () => logEvent('outbound_dm_click'));
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -319,11 +386,13 @@
 
       form.hidden = true;
       thanksCard.hidden = false;
+      logEvent('form_submit_success');
     } catch (err) {
       statusEl.textContent = 'Something went wrong sending this. Please DM us instead for now.';
       statusEl.classList.add('error');
       submitBtn.disabled = false;
       submitBtn.textContent = 'Start my plan';
+      logEvent('form_submit_error', { message: String(err && err.message || err) });
     }
   });
 </script>
