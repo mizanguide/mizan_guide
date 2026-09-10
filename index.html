@@ -301,7 +301,7 @@
         },
         body: JSON.stringify({
           event_type: type,
-          source_path: location.pathname,
+          source_path: location.pathname + location.search,
           referrer: document.referrer || null,
           meta: meta || null,
         }),
@@ -331,6 +331,29 @@
       if (el) sectionObserver.observe(el);
     });
   }
+
+  // Scroll-depth tracking: replaces GA4's default single "90% scrolled" auto-event with real
+  // 25/50/75/100 checkpoints, each fired once, so drop-off between checkpoints is visible
+  // instead of a single yes/no signal.
+  (function () {
+    const thresholds = [25, 50, 75, 100];
+    const fired = new Set();
+    function checkDepth() {
+      const doc = document.documentElement;
+      const scrolled = doc.scrollTop + window.innerHeight;
+      const total = doc.scrollHeight;
+      if (total <= window.innerHeight) return;
+      const pct = Math.round((scrolled / total) * 100);
+      thresholds.forEach((t) => {
+        if (pct >= t && !fired.has(t)) {
+          fired.add(t);
+          logEvent('scroll_depth', { percent: t });
+        }
+      });
+      if (fired.size === thresholds.length) window.removeEventListener('scroll', checkDepth);
+    }
+    window.addEventListener('scroll', checkDepth, { passive: true });
+  })();
 
   const form = document.getElementById('intake-form');
   const statusEl = document.getElementById('form-status');
@@ -366,7 +389,7 @@
       duration: document.getElementById('duration').value.trim() || null,
       tried: document.getElementById('tried').value.trim() || null,
       more: document.getElementById('more').value.trim() || null,
-      source_path: location.pathname,
+      source_path: location.pathname + location.search,
     };
 
     try {

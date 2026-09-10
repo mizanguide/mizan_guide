@@ -40,6 +40,41 @@ Supabase without them, you just won't get emailed):
    near the top of the `<script>` block, paste the three values in, commit, push. Done, live
    within the minute since Pages redeploys automatically.
 
+## UTM tagging, locked 2026-09-11
+
+**Every link posted anywhere other than the Instagram bio must carry UTM parameters**, so GA4
+and `mizan_events`/`mizan_leads` (both now capture the full query string in `source_path`, not
+just the bare path) can attribute a visit to the exact piece of content that drove it, not just
+"direct." Without this, GA can only ever show generic events (page_view, section_view, scroll)
+with no way to tell which reel, Story, or post a given session came from.
+
+**Format:** `https://mizanguide.github.io/mizan_guide/?utm_source=instagram&utm_medium=<type>&utm_campaign=<YYYY-MM-DD_slug>`
+
+- `utm_source` — always `instagram` unless it's Substack (`substack`) or a direct DM (`dm`).
+- `utm_medium` — `story`, `reel`, `post`, or `email` (Substack).
+- `utm_campaign` — the topic folder's own date+slug, e.g. `2026-09-11_followerstory`, so it maps
+  straight back to the `Animations/` or `CaseStudies/` folder that produced it.
+
+**Where this applies:** any Story link sticker, any Substack post link, any direct DM link. It
+does NOT apply to the static Instagram bio link (reels only ever say "link in bio," they can't
+carry a per-reel tag) — that one link stays fixed as
+`?utm_source=instagram&utm_medium=bio` permanently, so bio-driven traffic is at least
+distinguishable from Story/Substack/DM traffic, even without per-reel attribution.
+
+Query the real numbers with `select event_type, source_path, count(*) from mizan_events group by
+1, 2 order by 3 desc;` against the anon-readable `mizan_events` table, never trust a screenshot
+of the GA4 realtime view for anything beyond a quick sanity check, GA4 doesn't expose per-campaign
+funnel counts as easily as a direct SQL query does.
+
+## On-page event granularity, locked 2026-09-11
+
+Beyond `page_view`, `section_view` (fires once per section: `proof-section`, `offer-section`,
+`cta-section`), `form_start`, `form_submit_success`/`form_submit_error`, and
+`outbound_dm_click`, the page also fires `scroll_depth` at four real checkpoints (25/50/75/100%
+of actual page height), each once, replacing GA4's own single generic "90% scrolled" auto-event.
+This answers "how far did they actually get before leaving" with real resolution instead of one
+yes/no signal.
+
 ## What NOT to put in this repo
 
 Never commit the Supabase `service_role` / secret key anywhere in this folder. It grants full
