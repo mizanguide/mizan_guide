@@ -159,6 +159,41 @@
   .field input:focus, .field textarea:focus { outline: none; border-color: var(--sage); }
   .field textarea { min-height: 70px; }
   .form-note { font-size: 13.5px; color: var(--tint); margin: var(--sp-1) 0 var(--sp-3); }
+
+  /* Stepped quiz: one question per screen, identity asked last. The first tap is about the
+     pattern (when, how long), never a confession box, and the Instagram handle only appears
+     after five answers are already in. Same six fields, same ids, same payload. */
+  .quiz { margin-top: var(--sp-4); }
+  .quiz .progress {
+    font-family: 'Karla'; font-weight: 700; font-size: 11.5px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--tint); text-align: center; margin-bottom: var(--sp-2);
+  }
+  .quiz .bar { height: 3px; background: var(--hairline); border-radius: 2px; max-width: 420px; margin: 0 auto var(--sp-3); overflow: hidden; }
+  .quiz .bar i { display: block; height: 100%; width: 0; background: var(--sage); transition: width .25s ease; }
+  .step { display: none; }
+  .step.on { display: block; }
+  .step .q {
+    font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 24px; line-height: 1.3;
+    color: var(--deep); text-align: center; max-width: 420px; margin: 0 auto var(--sp-3);
+  }
+  .step .q small { display: block; font-family: 'Karla'; font-weight: 400; font-size: 14px; color: var(--text3); margin-top: var(--sp-1); }
+  .opts { display: grid; gap: 10px; max-width: 420px; margin: 0 auto; }
+  .opt {
+    width: 100%; text-align: left; font-family: 'Karla'; font-size: 15.5px; color: var(--ink);
+    background: var(--card); border: 2px solid var(--hairline); border-radius: 12px;
+    padding: 14px 16px; cursor: pointer; min-height: 48px;
+  }
+  .opt:hover, .opt:focus { border-color: var(--sage); outline: none; }
+  .opt.picked { border-color: var(--sage); background: #eef2ea; }
+  .step .field { max-width: 420px; margin: 0 auto var(--sp-2); }
+  .step .other { display: none; }
+  .step .other.on { display: block; margin-top: var(--sp-2); }
+  .nav { display: flex; justify-content: center; align-items: center; gap: var(--sp-3); margin-top: var(--sp-3); }
+  .back {
+    background: none; border: none; font-family: 'Karla'; font-weight: 700; font-size: 14px;
+    color: var(--text3); cursor: pointer; padding: 10px 0;
+  }
+  .step .btn { min-width: 160px; }
   .form-status { font-size: 14.5px; margin-top: var(--sp-2); min-height: 20px; }
   .form-status.error { color: var(--terracotta); }
   .thanks {
@@ -198,6 +233,87 @@
 
   <main>
 
+  <section class="cta" id="cta-section">
+    <h2 class="section-title">Start your plan</h2>
+    <p>Six quick questions. Tap what fits, skip what you want. We reply by DM.</p>
+
+    <form class="intake quiz" id="intake-form" novalidate>
+      <div class="progress" id="quiz-progress">Question 1 of 6</div>
+      <div class="bar"><i id="quiz-bar"></i></div>
+
+      <div class="step on" data-step="1" data-field="timing">
+        <div class="q">When does it usually happen?</div>
+        <div class="opts">
+          <button type="button" class="opt" data-val="Late night, after Isha">Late night, after Isha</button>
+          <button type="button" class="opt" data-val="Alone at home during the day">Alone at home during the day</button>
+          <button type="button" class="opt" data-val="It feels random">It feels random</button>
+          <button type="button" class="opt" data-val="__other">Something else</button>
+        </div>
+        <div class="field other"><input type="text" id="timing" name="timing" placeholder="When, in your own words"></div>
+      </div>
+
+      <div class="step" data-step="2" data-field="duration">
+        <div class="q">How long has this been going on?</div>
+        <div class="opts">
+          <button type="button" class="opt" data-val="A few weeks">A few weeks</button>
+          <button type="button" class="opt" data-val="Months">Months</button>
+          <button type="button" class="opt" data-val="Years">Years</button>
+          <button type="button" class="opt" data-val="Since I was a kid">Since I was a kid</button>
+        </div>
+        <div class="field other"><input type="text" id="duration" name="duration" placeholder="How long, in your own words"></div>
+      </div>
+
+      <div class="step" data-step="3" data-field="tried">
+        <div class="q">What have you already tried?</div>
+        <div class="opts">
+          <button type="button" class="opt" data-val="Blocking apps and sites">Blocking apps and sites</button>
+          <button type="button" class="opt" data-val="Promising myself and making tawbah">Promising myself and making tawbah</button>
+          <button type="button" class="opt" data-val="Streak counting or nofap">Streak counting or nofap</button>
+          <button type="button" class="opt" data-val="Nothing that stuck">Nothing that stuck</button>
+          <button type="button" class="opt" data-val="__other">Something else</button>
+        </div>
+        <div class="field other"><input type="text" id="tried" name="tried" placeholder="What you tried, in your own words"></div>
+      </div>
+
+      <div class="step" data-step="4" data-field="struggle">
+        <div class="q">What does it actually look like for you?<small>Optional. Only we read this. Nothing is posted or shared.</small></div>
+        <div class="field"><textarea id="struggle" name="struggle" placeholder="Whatever you're comfortable sharing"></textarea></div>
+      </div>
+
+      <div class="step" data-step="5" data-field="more">
+        <div class="q">Anything the questions missed?<small>Optional. Not everyone fits the questions above.</small></div>
+        <div class="field"><textarea id="more" name="more" placeholder="Anything else you want us to know"></textarea></div>
+      </div>
+
+      <div class="step" data-step="6" data-field="ig">
+        <div class="q">Where should we send your first step?<small>We reply by DM, not an autoreply.</small></div>
+        <div class="field">
+          <label for="ig">Your Instagram username</label>
+          <input type="text" id="ig" name="instagram" placeholder="@yourusername" required>
+        </div>
+        <div class="field">
+          <label for="email">Email <span class="hint">(optional, in case a DM does not reach you)</span></label>
+          <input type="email" id="email" name="email" placeholder="you@example.com">
+        </div>
+        <p class="form-note" style="text-align:center">Only we can see what you send here. Nothing is posted or shared.</p>
+      </div>
+
+      <div class="nav">
+        <button type="button" class="back" id="quiz-back" hidden>Back</button>
+        <button type="button" class="btn" id="quiz-next">Next</button>
+        <button type="submit" class="btn" id="submit-btn" hidden>Start my plan</button>
+      </div>
+      <div class="form-status" id="form-status" style="text-align:center"></div>
+    </form>
+
+    <div class="thanks" id="thanks-card" hidden>
+      <div class="t">Got it.</div>
+      <p id="thanks-text">We read every one of these ourselves. Expect a DM from us soon, not an autoreply, with your first step and how to send the $5.</p>
+    </div>
+
+    <p class="fallback-link"><a class="btn-ghost" id="dm-fallback-link" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
+  </section>
+
   <section class="proof" id="proof-section">
     <div class="intro">The Prophet, peace be upon him, said Allah's own words on this exact pattern:</div>
     <p class="line">"My slave has known that he has a Lord who forgives sins and punishes for it, I therefore have forgiven my slave."</p>
@@ -209,52 +325,6 @@
     <p class="line">This isn't a document you read once. Every day for 14 days, we send you one real step, you tell us how it actually went, and the next step is built from that, not a fixed script.</p>
     <p class="line" style="margin-top: var(--sp-2);"><span class="price">$5</span> for all 14 days.</p>
   </div>
-
-  <section class="cta" id="cta-section">
-    <h2 class="section-title">Start your plan</h2>
-    <p>Answer whatever you are comfortable with. The more you share, the more personal the plan. We reply by DM.</p>
-
-    <form class="intake" id="intake-form">
-      <div class="field">
-        <label for="ig">Your Instagram username <span class="hint">(so we can DM you back)</span></label>
-        <input type="text" id="ig" name="instagram" placeholder="@yourusername" required>
-      </div>
-      <div class="field">
-        <label for="email">Email <span class="hint">(optional, in case a DM does not reach you)</span></label>
-        <input type="email" id="email" name="email" placeholder="you@example.com">
-      </div>
-      <div class="field">
-        <label for="struggle">What is the actual struggle</label>
-        <textarea id="struggle" name="struggle" placeholder="Whatever you're comfortable sharing"></textarea>
-      </div>
-      <div class="field">
-        <label for="timing">Does it hit at a specific time, or does it feel random</label>
-        <input type="text" id="timing" name="timing">
-      </div>
-      <div class="field">
-        <label for="duration">How long has this been going on</label>
-        <input type="text" id="duration" name="duration">
-      </div>
-      <div class="field">
-        <label for="tried">What have you already tried, if anything</label>
-        <input type="text" id="tried" name="tried">
-      </div>
-      <div class="field">
-        <label for="more">Anything else you want to add <span class="hint">(optional, not everyone fits the questions above)</span></label>
-        <textarea id="more" name="more" placeholder="Anything the questions above didn't cover"></textarea>
-      </div>
-      <p class="form-note">Only we can see what you send here. Nothing is posted or shared.</p>
-      <button type="submit" class="btn" id="submit-btn">Start my plan</button>
-      <div class="form-status" id="form-status"></div>
-    </form>
-
-    <div class="thanks" id="thanks-card" hidden>
-      <div class="t">Got it.</div>
-      <p id="thanks-text">We read every one of these ourselves. Expect a DM from us soon, not an autoreply, with your first step and how to send the $5.</p>
-    </div>
-
-    <p class="fallback-link"><a class="btn-ghost" id="dm-fallback-link" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
-  </section>
 
   </main>
 
@@ -361,9 +431,74 @@
   const thanksCard = document.getElementById('thanks-card');
 
   let formStarted = false;
-  form.addEventListener('focusin', () => {
+  function markStarted() {
     if (!formStarted) { formStarted = true; logEvent('form_start'); }
+  }
+  form.addEventListener('focusin', markStarted);
+
+  // Stepped quiz. Every step change is logged with its number, so drop-off per question
+  // is visible in mizan_events and GA4 as quiz_step, not just start/submit.
+  const steps = Array.from(form.querySelectorAll('.step'));
+  const nextBtn = document.getElementById('quiz-next');
+  const backBtn = document.getElementById('quiz-back');
+  const progressEl = document.getElementById('quiz-progress');
+  const barEl = document.getElementById('quiz-bar');
+  let current = 0;
+
+  function showStep(i) {
+    current = i;
+    steps.forEach((s, n) => s.classList.toggle('on', n === i));
+    progressEl.textContent = `Question ${i + 1} of ${steps.length}`;
+    barEl.style.width = `${Math.round(((i + 1) / steps.length) * 100)}%`;
+    backBtn.hidden = i === 0;
+    const last = i === steps.length - 1;
+    nextBtn.hidden = last;
+    submitBtn.hidden = !last;
+    statusEl.textContent = '';
+    statusEl.classList.remove('error');
+    const focusable = steps[i].querySelector('textarea, input:not([type=hidden])');
+    if (focusable && !steps[i].querySelector('.opts')) focusable.focus({ preventScroll: true });
+  }
+
+  steps.forEach((step) => {
+    const input = step.querySelector('input, textarea');
+    const otherWrap = step.querySelector('.other');
+    step.querySelectorAll('.opt').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        markStarted();
+        step.querySelectorAll('.opt').forEach((b) => b.classList.remove('picked'));
+        btn.classList.add('picked');
+        if (btn.dataset.val === '__other') {
+          otherWrap.classList.add('on');
+          input.value = '';
+          input.focus({ preventScroll: true });
+        } else {
+          otherWrap.classList.remove('on');
+          input.value = btn.dataset.val;
+          logEvent('quiz_step', { step: Number(step.dataset.step), field: step.dataset.field, answered: true });
+          showStep(current + 1);
+        }
+      });
+    });
   });
+
+  nextBtn.addEventListener('click', () => {
+    markStarted();
+    const step = steps[current];
+    const input = step.querySelector('input, textarea');
+    logEvent('quiz_step', { step: Number(step.dataset.step), field: step.dataset.field, answered: !!(input && input.value.trim()) });
+    showStep(current + 1);
+  });
+  backBtn.addEventListener('click', () => showStep(current - 1));
+
+  form.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT' && current < steps.length - 1) {
+      e.preventDefault();
+      nextBtn.click();
+    }
+  });
+
+  showStep(0);
 
   const dmLink = document.getElementById('dm-fallback-link');
   if (dmLink) dmLink.addEventListener('click', () => logEvent('outbound_dm_click'));

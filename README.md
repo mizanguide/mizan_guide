@@ -66,6 +66,18 @@ Query the real numbers with `select event_type, source_path, count(*) from mizan
 of the GA4 realtime view for anything beyond a quick sanity check, GA4 doesn't expose per-campaign
 funnel counts as easily as a direct SQL query does.
 
+## The form is a stepped quiz, shipped 2026-09-12
+
+Same six fields, same ids, same Supabase payload and EmailJS template, different shape: one
+question per screen, tap-to-answer buttons for timing/duration/tried (with a "Something else"
+text fallback), the two free-text questions optional, and the Instagram handle asked LAST, after
+five answers are already in. The quiz sits directly under the hero; the proof card and the $5
+line moved below it. Reason: two days of real funnel data showed the page converting 12.5% of
+visits but half of visitors never scrolling to a form whose first field was their Instagram
+handle under a page that says "porn." Every step fires a `quiz_step` event (`meta.step`,
+`meta.field`, `meta.answered`) so drop-off per question is visible; `form_start` fires on the
+first tap. Judge it on visit-to-submit rate after 2026-09-12 versus the 12.5% before.
+
 ## On-page event granularity, locked 2026-09-11
 
 Beyond `page_view`, `section_view` (fires once per section: `proof-section`, `offer-section`,
