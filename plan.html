@@ -39,12 +39,36 @@
 
   .progress { text-align: center; }
   .progress .t { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 26px; color: var(--deep); margin: 0; }
-  .dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--sp-2); }
-  .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--hairline); background: transparent; }
-  .dot.done { background: var(--sage); border-color: var(--sage); }
-  .dot.partly { background: var(--tint); border-color: var(--tint); }
-  .dot.open { border-color: var(--sage); }
-  .dot.current { box-shadow: 0 0 0 3px var(--cream), 0 0 0 5px var(--terracotta); }
+  /* Progress dashboard. "Not yet" is shown as an open outline, never red and never a counted
+     failure: the page counts what was done, it does not keep a tally against anyone. */
+  .dash { background: var(--card); border: 2px solid var(--hairline); border-radius: 14px; padding: 22px 20px; margin-top: var(--sp-2); }
+  .dash-top { display: flex; align-items: center; gap: 20px; }
+  .ring { position: relative; width: 112px; height: 112px; flex: 0 0 auto; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring .track { fill: none; stroke: var(--hairline); stroke-width: 10; }
+  .ring .fill { fill: none; stroke: var(--sage); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
+  .ring .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring .num { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 30px; color: var(--deep); line-height: 1; }
+  .ring .of { font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); font-weight: 700; margin-top: 4px; }
+  .stats { display: grid; gap: 10px; flex: 1; }
+  .stat .v { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 24px; color: var(--ink); line-height: 1.1; }
+  .stat .k { font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); font-weight: 700; }
+  .week-label { font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--tint); font-weight: 700; margin: 18px 0 6px; }
+  .grid7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cell { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; border: 2px solid var(--hairline); color: var(--text3); background: var(--cream); }
+  .cell.done { background: var(--sage); border-color: var(--sage); color: var(--card); }
+  .cell.partly { background: var(--tint); border-color: var(--tint); color: var(--card); }
+  .cell.notyet { background: var(--card); border: 2px dashed var(--tint); color: var(--text3); }
+  .cell.open { background: var(--card); border-color: var(--sage); color: var(--deep); }
+  .cell.future { opacity: 0.45; }
+  .cell.today { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--terracotta); }
+  .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin-top: 16px; font-size: 12px; color: var(--text3); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 2px solid var(--hairline); }
+  .legend i.done { background: var(--sage); border-color: var(--sage); }
+  .legend i.partly { background: var(--tint); border-color: var(--tint); }
+  .legend i.notyet { background: var(--card); border: 2px dashed var(--tint); }
+  .legend i.today { background: var(--card); border-color: var(--terracotta); }
 
   .card { background: var(--card); border: 2px solid var(--hairline); border-radius: 14px; padding: 22px 20px; margin-top: var(--sp-3); }
   .label { font-size: 11.5px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--sage); font-weight: 700; margin-bottom: var(--sp-1); }
@@ -123,6 +147,71 @@
     app.replaceChildren(s);
   }
 
+  function buildDashboard(checkins, publishedCount, todayDay, total) {
+    const vals = [...checkins.values()];
+    const doneN = vals.filter((v) => v === 'done').length;
+    const partlyN = vals.filter((v) => v === 'partly').length;
+    const pct = Math.min(1, (doneN + partlyN * 0.5) / total);
+
+    // Today not checked in yet does not break the streak, it just hasn't happened yet.
+    let streak = 0;
+    let d = checkins.has(todayDay) ? todayDay : todayDay - 1;
+    while (d >= 1 && ['done', 'partly'].includes(checkins.get(d))) { streak++; d--; }
+
+    const dash = el('section', 'dash');
+    const top = el('div', 'dash-top');
+
+    const r = 46, C = 2 * Math.PI * r;
+    const ring = el('div', 'ring');
+    ring.innerHTML = `<svg viewBox="0 0 112 112" aria-hidden="true"><circle class="track" cx="56" cy="56" r="${r}"/><circle class="fill" cx="56" cy="56" r="${r}" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${C.toFixed(2)}"/></svg>`;
+    const center = el('div', 'center');
+    center.append(el('div', 'num', `${Math.round(pct * 100)}%`), el('div', 'of', 'complete'));
+    ring.append(center);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      ring.querySelector('.fill').setAttribute('stroke-dashoffset', (C * (1 - pct)).toFixed(2));
+    }));
+
+    const stats = el('div', 'stats');
+    [
+      [`${doneN}`, doneN === 1 ? 'Day done' : 'Days done'],
+      [`${streak} ${streak === 1 ? 'day' : 'days'}`, 'Current streak'],
+      [`${vals.length} of ${publishedCount}`, 'Check-ins sent'],
+    ].forEach(([v, k]) => {
+      const s = el('div', 'stat');
+      s.append(el('div', 'v', v), el('div', 'k', k));
+      stats.append(s);
+    });
+    top.append(ring, stats);
+    dash.append(top);
+
+    for (let w = 0; w < Math.ceil(total / 7); w++) {
+      dash.append(el('div', 'week-label', `Week ${w + 1}`));
+      const grid = el('div', 'grid7');
+      for (let i = w * 7 + 1; i <= Math.min(total, w * 7 + 7); i++) {
+        const state = checkins.get(i);
+        const c = el('div', 'cell', String(i));
+        if (state === 'done') c.classList.add('done');
+        else if (state === 'partly') c.classList.add('partly');
+        else if (state === 'not_yet') c.classList.add('notyet');
+        else if (i <= publishedCount) c.classList.add('open');
+        else c.classList.add('future');
+        if (i === todayDay) c.classList.add('today');
+        c.title = `Day ${i}`;
+        grid.append(c);
+      }
+      dash.append(grid);
+    }
+
+    const legend = el('div', 'legend');
+    [['done', 'Done'], ['partly', 'Partly'], ['notyet', 'Not yet'], ['today', 'Today']].forEach(([cls, label]) => {
+      const s = el('span');
+      s.append(el('i', cls), document.createTextNode(label));
+      legend.append(s);
+    });
+    dash.append(legend);
+    return dash;
+  }
+
   function render(plan) {
     if (!plan) {
       showState('Your plan starts once payment is confirmed.',
@@ -142,19 +231,8 @@
 
     const prog = el('section', 'progress');
     prog.append(el('p', 't', `Day ${today.day} of ${total}`));
-    const dots = el('div', 'dots');
-    for (let i = 1; i <= total; i++) {
-      const state = checkins.get(i);
-      const d = el('span', 'dot');
-      if (state === 'done') d.classList.add('done');
-      else if (state === 'partly') d.classList.add('partly');
-      else if (i <= today.day) d.classList.add('open');
-      if (i === today.day) d.classList.add('current');
-      d.title = `Day ${i}`;
-      dots.append(d);
-    }
-    prog.append(dots);
     app.append(prog);
+    app.append(buildDashboard(checkins, days.length, today.day, total));
 
     const card = el('section', 'card');
     card.append(el('div', 'label', "Today's step"), el('h2', null, today.title), el('p', 'step', today.step));
