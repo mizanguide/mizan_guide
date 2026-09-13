@@ -219,6 +219,7 @@
   const toastEl = document.getElementById('toast');
   let currentPlan = null;
   let pickedTrigger = null;
+  let fabObserver = null;
 
   function toast(msg) {
     toastEl.textContent = msg;
@@ -572,6 +573,19 @@
       ci.append(row, el('p', 'q2', countQ), timesRow, ...(prefillNote ? [prefillNote] : []), note, send, err);
     }
     app.append(ci);
+
+    // The floating button would sit on top of the log's remove buttons and the End my day card,
+    // so it hides while either of those cards is on screen (both have their own buttons) and
+    // shows only higher up the page, where logging is otherwise out of reach.
+    if (fabObserver) fabObserver.disconnect();
+    if (canLog && 'IntersectionObserver' in window) {
+      const visible = new Set();
+      fabObserver = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); });
+        fab.hidden = visible.size > 0;
+      });
+      [app.querySelector('.logcard'), ci].filter(Boolean).forEach((c) => fabObserver.observe(c));
+    }
 
     if (days.length > 1) {
       const earlier = el('section', 'earlier');
