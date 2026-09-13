@@ -211,6 +211,34 @@
   }
   .thanks p { font-size: 15px; color: var(--text2); margin: 0; }
 
+  /* Hard payment wall: the quiz ends here, nothing about the plan is given before payment. */
+  .paywall {
+    background: var(--card); border: 2px solid var(--hairline); border-radius: 14px;
+    padding: 24px 20px; max-width: 420px; margin: var(--sp-4) auto 0; text-align: left;
+  }
+  .pw-label { font-weight: 700; font-size: 11.5px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--sage); text-align: center; }
+  .pw-t { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 22px; color: var(--deep); text-align: center; margin: var(--sp-1) 0 var(--sp-2); }
+  .readout { list-style: none; padding: 0; margin: 0 0 var(--sp-3); }
+  .readout li { font-size: 15px; color: var(--ink); padding: 8px 0; border-bottom: 1px solid var(--hairline); }
+  .readout li b { display: block; color: var(--text3); font-weight: 700; font-size: 11.5px; letter-spacing: 1px; text-transform: uppercase; }
+  .pw-lead { font-size: 15.5px; color: var(--text2); text-align: center; margin: 0 0 var(--sp-2); }
+  #pay-price { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 20px; color: var(--terracotta); }
+  .pay-box { background: var(--cream); border-radius: 12px; padding: 4px 14px; }
+  .pay-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--hairline); font-size: 14px; }
+  .pay-row:last-child { border-bottom: none; }
+  .pay-row span { color: var(--text3); }
+  .pay-row b { color: var(--ink); text-align: right; word-break: break-all; }
+  .pay-row.ref b { color: var(--terracotta); font-size: 16px; letter-spacing: 1px; white-space: nowrap; word-break: normal; }
+  #pay-price { white-space: nowrap; }
+  /* Author display rules (like .paywall .btn below) beat the browser's default for the hidden
+     attribute, which left hidden buttons on screen. This keeps hidden meaning hidden. */
+  [hidden] { display: none !important; }
+  .paywall .btn { display: block; width: 100%; margin-top: var(--sp-3); }
+  .pay-note { font-size: 14.5px; color: var(--text2); text-align: center; margin: var(--sp-2) 0 0; min-height: 20px; }
+  .pay-note.error { color: var(--terracotta); }
+  .abroad { text-align: center; margin: var(--sp-1) 0 0; }
+  .abroad .back { font-size: 13.5px; text-decoration: underline; }
+
   .fallback-link { margin-top: var(--sp-3); text-align: center; }
 
   /* Beat 5: footer. Its own beat, sp-6 clears, quietest type on the page (small caps,
@@ -240,7 +268,7 @@
 
   <section class="cta" id="cta-section">
     <h2 class="section-title">Start your plan</h2>
-    <p>Six quick questions. Tap what fits, skip what you want. We reply by DM or email.</p>
+    <p>Six quick questions. Tap what fits, skip what you want.</p>
 
     <form class="intake quiz" id="intake-form" novalidate>
       <div class="progress" id="quiz-progress">Question 1 of 6</div>
@@ -293,7 +321,7 @@
       </div>
 
       <div class="step" data-step="6" data-field="ig">
-        <div class="q">Where should we send your first step?<small>We reply by DM or email, not an autoreply.</small></div>
+        <div class="q">Where should we send your plan?<small>Your private plan link goes here once payment is in.</small></div>
         <div class="field">
           <label for="ig">Your Instagram username or email</label>
           <input type="text" id="ig" name="instagram" placeholder="@yourusername or you@email.com" required>
@@ -313,9 +341,21 @@
       <div class="form-status" id="form-status" style="text-align:center"></div>
     </form>
 
-    <div class="thanks" id="thanks-card" hidden>
-      <div class="t">Got it.</div>
-      <p id="thanks-text">We read every one of these ourselves. Expect a message from us soon, by DM or email, not an autoreply, with how to send the $5 and your first step.</p>
+    <div class="paywall" id="paywall" hidden>
+      <div class="pw-label">Your plan is ready to build</div>
+      <p class="pw-t">Built around what you told us</p>
+      <ul class="readout" id="readout"></ul>
+      <p class="pw-lead">It starts the moment your <span id="pay-price">$5</span> is in. Nothing is sent before that.</p>
+      <div class="pay-box">
+        <div class="pay-row"><span>Account name</span><b id="pd-name">Loading...</b></div>
+        <div class="pay-row"><span>Bank</span><b id="pd-bank"></b></div>
+        <div class="pay-row"><span>Account number</span><b id="pd-acct"></b></div>
+        <div class="pay-row"><span>IBAN</span><b id="pd-iban"></b></div>
+        <div class="pay-row ref"><span>Write this in the transfer remarks</span><b id="pay-ref"></b></div>
+      </div>
+      <button type="button" class="btn" id="paid-btn" hidden>I've sent the $5</button>
+      <p class="pay-note" id="pay-note"></p>
+      <p class="abroad"><button type="button" class="back" id="abroad-btn">Outside Pakistan? Tap here and we'll send you a card link</button></p>
     </div>
 
     <p class="fallback-link"><a class="btn-ghost" id="dm-fallback-link" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
@@ -435,7 +475,106 @@
   const form = document.getElementById('intake-form');
   const statusEl = document.getElementById('form-status');
   const submitBtn = document.getElementById('submit-btn');
-  const thanksCard = document.getElementById('thanks-card');
+  const paywall = document.getElementById('paywall');
+  const payNote = document.getElementById('pay-note');
+  const paidBtn = document.getElementById('paid-btn');
+  const abroadBtn = document.getElementById('abroad-btn');
+  let leadRef = null;
+  let leadContact = null;
+
+  // Short code the payer writes in the bank transfer remarks, so a payment can be matched to
+  // the right person. No 0/O/1/I/L, so it survives being typed into a banking app.
+  function makeRef() {
+    const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    const b = new Uint8Array(5);
+    crypto.getRandomValues(b);
+    return 'MZ-' + [...b].map((x) => A[x % A.length]).join('');
+  }
+
+  async function rpc(fn, body) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error('Request failed: ' + res.status);
+    return res.json();
+  }
+
+  function notifyAnas(subjectLine) {
+    try {
+      if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          instagram: subjectLine, email: 'n/a', struggle: 'n/a', timing: 'n/a',
+          duration: 'n/a', tried: 'n/a', more: 'n/a',
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+
+  async function showPaywall(payload) {
+    const readout = document.getElementById('readout');
+    readout.replaceChildren();
+    [['When', payload.timing], ['For', payload.duration], ['Already tried', payload.tried]]
+      .filter(([, v]) => v)
+      .forEach(([k, v]) => {
+        const li = document.createElement('li');
+        const b = document.createElement('b');
+        b.textContent = k;
+        li.append(b, document.createTextNode(v));
+        readout.append(li);
+      });
+    if (!readout.children.length) {
+      const li = document.createElement('li');
+      li.textContent = 'Your answers, read by us, not a template.';
+      readout.append(li);
+    }
+    document.getElementById('pay-ref').textContent = leadRef;
+    paywall.hidden = false;
+    paywall.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    logEvent('paywall_view');
+    try {
+      const d = await rpc('get_payment_details', { p_ref: leadRef });
+      if (!d) throw new Error('no details');
+      document.getElementById('pd-name').textContent = d.account_name;
+      document.getElementById('pd-bank').textContent = d.bank;
+      document.getElementById('pd-acct').textContent = d.account_number;
+      document.getElementById('pd-iban').textContent = d.iban;
+      if (d.price_pkr) document.getElementById('pay-price').textContent = `$${d.price_usd} (Rs ${Number(d.price_pkr).toLocaleString('en-US')})`;
+      paidBtn.hidden = false;
+    } catch (e) {
+      document.getElementById('pd-name').textContent = 'Could not load';
+      payNote.textContent = `Payment details did not load. Refresh this page, or DM us at @mizan.guide with your code ${leadRef}.`;
+      payNote.classList.add('error');
+    }
+  }
+
+  async function setPayment(status, doneText, subject, eventName) {
+    paidBtn.disabled = true;
+    abroadBtn.disabled = true;
+    payNote.classList.remove('error');
+    try {
+      const ok = await rpc('set_lead_payment', { p_ref: leadRef, p_status: status });
+      if (ok !== true) throw new Error('rejected');
+      paidBtn.hidden = true;
+      abroadBtn.parentElement.hidden = true;
+      payNote.textContent = doneText;
+      notifyAnas(`${subject} ${leadRef}, ${leadContact}`);
+      logEvent(eventName);
+    } catch (e) {
+      paidBtn.disabled = false;
+      abroadBtn.disabled = false;
+      payNote.textContent = `That did not go through. Please try again, or DM us at @mizan.guide with your code ${leadRef}.`;
+      payNote.classList.add('error');
+    }
+  }
+
+  paidBtn.addEventListener('click', () => setPayment('claimed',
+    `Thank you. We will check the transfer and send your private plan link to ${leadContact} today.`,
+    'PAYMENT CLAIMED', 'payment_claimed'));
+  abroadBtn.addEventListener('click', () => setPayment('wants_card',
+    `Got it. We will send a card payment link to ${leadContact} as soon as it is ready.`,
+    'WANTS CARD LINK', 'payment_wants_card'));
 
   let formStarted = false;
   function markStarted() {
@@ -550,6 +689,7 @@
     submitBtn.textContent = 'Sending...';
 
     const payload = {
+      ref: makeRef(),
       instagram: ig,
       email: document.getElementById('email').value.trim() || null,
       struggle: document.getElementById('struggle').value.trim() || null,
@@ -561,7 +701,7 @@
     };
 
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/mizan_leads`, {
+      const insert = () => fetch(`${SUPABASE_URL}/rest/v1/mizan_leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -571,13 +711,17 @@
         },
         body: JSON.stringify(payload),
       });
+      let res = await insert();
+      if (res.status === 409) { payload.ref = makeRef(); res = await insert(); }
       if (!res.ok) throw new Error('Request failed: ' + res.status);
+      leadRef = payload.ref;
+      leadContact = payload.email || payload.instagram;
 
       // Best-effort email notification. Never blocks or fails the actual submission,
       // the Supabase row is already saved by this point regardless of what happens here.
       if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
         emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          instagram: payload.instagram,
+          instagram: `${payload.instagram}, code ${payload.ref}`,
           email: payload.email || 'not given',
           struggle: payload.struggle || 'not given',
           timing: payload.timing || 'not given',
@@ -588,8 +732,8 @@
       }
 
       form.hidden = true;
-      thanksCard.hidden = false;
       logEvent('form_submit_success');
+      showPaywall(payload);
     } catch (err) {
       statusEl.textContent = 'Something went wrong sending this. Please DM us instead for now.';
       statusEl.classList.add('error');

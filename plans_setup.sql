@@ -102,3 +102,55 @@ revoke all on function public.get_plan(uuid) from public;
 grant execute on function public.get_plan(uuid) to anon;
 revoke all on function public.submit_checkin(uuid, int, text, text) from public;
 grant execute on function public.submit_checkin(uuid, int, text, text) to anon;
+
+-- ---------------------------------------------------------------------------------------------
+-- Hard payment wall. Each quiz submission carries a short reference code (MZ-XXXXX) that the
+-- payer writes in the bank transfer remarks. Payment details are NOT in this public file or the
+-- site's code: they live in mizan_settings (no policies, unreadable directly) and are returned
+-- only to someone holding the reference code of a real submission.
+
+alter table public.mizan_leads add column if not exists ref text unique;
+alter table public.mizan_leads add column if not exists payment_status text not null default 'unpaid';
+
+create table if not exists public.mizan_settings (
+  key text primary key,
+  value jsonb not null
+);
+alter table public.mizan_settings enable row level security;
+
+create or replace function public.get_payment_details(p_ref text)
+returns json
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select s.value::json
+  from mizan_settings s
+  where s.key = 'payment'
+    and exists (select 1 from mizan_leads l where l.ref = p_ref);
+$$;
+
+-- The page can only move a lead to "claimed" (I've sent it) or "wants_card" (outside Pakistan).
+-- Only Anas, with the service_role key, ever marks a lead "paid".
+create or replace function public.set_lead_payment(p_ref text, p_status text)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_status not in ('claimed', 'wants_card') then return false; end if;
+  update mizan_leads set payment_status = p_status
+  where ref = p_ref and payment_status in ('unpaid', 'claimed', 'wants_card');
+  return found;
+end;
+$$;
+
+revoke all on function public.get_payment_details(text) from public;
+grant execute on function public.get_payment_details(text) to anon;
+revoke all on function public.set_lead_payment(text, text) from public;
+grant execute on function public.set_lead_payment(text, text) to anon;
+
+-- New columns and functions are invisible to the API until its schema cache reloads.
+notify pgrst, 'reload schema';
