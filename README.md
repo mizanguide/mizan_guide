@@ -93,8 +93,12 @@ first tap. Judge it on visit-to-submit rate after 2026-09-12 versus the 12.5% be
   bar chart.
 - **Day clock:** a plan day runs from waking up to sleep and the check-in closes it. Day 1 asks
   for the last 24 hours, later days for "today". The next step is up by 9am Pakistan time.
+- **Logging through the day:** "Log a moment" saves each urge instantly (optional trigger, held
+  on or it happened) to `mizan_logs` via `log_moment`, removable with `remove_log` while the day
+  is open. "End my day" pre-fills the count from the log. Added by `logs_setup.sql`.
 - **Deploy order matters:** run `plans_setup.sql`, then the payment-details insert (private copy
-  in `Mizan/Plans/_PAYMENT_DETAILS.md`), then `checkin_times.sql`, THEN push. The form writes `ref`, so pushing before the
+  in `Mizan/Plans/_PAYMENT_DETAILS.md`), then `checkin_times.sql`, then `logs_setup.sql`, THEN
+  push. Any SQL that drops or replaces a function goes first, with the push right after. The form writes `ref`, so pushing before the
   SQL makes every submission fail.
 
 ## On-page event granularity, locked 2026-09-11
