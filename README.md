@@ -78,6 +78,25 @@ handle under a page that says "porn." Every step fires a `quiz_step` event (`met
 `meta.field`, `meta.answered`) so drop-off per question is visible; `form_start` fires on the
 first tap. Judge it on visit-to-submit rate after 2026-09-12 versus the 12.5% before.
 
+## Hard payment wall and the private plan page, built 2026-09-13
+
+- **Paywall:** the quiz ends on a paywall screen, not a thank-you. It shows a readout of the
+  answers, the price, bank transfer details, and a per-lead code (`MZ-XXXXX`, stored in
+  `mizan_leads.ref`) for the transfer remarks. "I've sent the $5" sets `payment_status` to
+  `claimed` through `set_lead_payment` and emails Anas. The bank details are never in this repo:
+  they live in `mizan_settings` and come back from `get_payment_details(ref)` only for a real
+  submission's code. Only the service_role admin tool marks a lead `paid`.
+- **Plan page:** `plan.html#<token>`, one private link per paying person, driven by
+  `get_plan` / `submit_checkin`. Admin tool: `Mizan/_tools/plans/plans.mjs` (outside this repo).
+- **Daily count and chart:** the check-in also asks how many times it happened (stored in
+  `mizan_checkins.times`, added by `checkin_times.sql`), and the dashboard shows a times-per-day
+  bar chart.
+- **Day clock:** a plan day runs from waking up to sleep and the check-in closes it. Day 1 asks
+  for the last 24 hours, later days for "today". The next step is up by 9am Pakistan time.
+- **Deploy order matters:** run `plans_setup.sql`, then the payment-details insert (private copy
+  in `Mizan/Plans/_PAYMENT_DETAILS.md`), then `checkin_times.sql`, THEN push. The form writes `ref`, so pushing before the
+  SQL makes every submission fail.
+
 ## On-page event granularity, locked 2026-09-11
 
 Beyond `page_view`, `section_view` (fires once per section: `proof-section`, `offer-section`,
