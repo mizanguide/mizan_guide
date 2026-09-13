@@ -134,6 +134,9 @@
   .out { background: var(--cream); color: var(--ink); border: 2px solid var(--hairline); }
   .out.picked { border-color: var(--sage); background: #eef2ea; color: var(--deep); }
   .sheet-save { margin-top: var(--sp-3); }
+  .sheet-panel { max-height: 92vh; overflow-y: auto; }
+  .sheet-note { margin-top: 0; min-height: 64px; }
+  .log-list .ln { display: block; font-size: 13px; color: var(--text2); margin-top: 2px; white-space: pre-line; }
   .sheet-cancel { display: block; margin: var(--sp-2) auto 0; background: none; border: none; font-family: 'Karla'; font-weight: 700; color: var(--text3); font-size: 14px; cursor: pointer; padding: 8px; }
   .toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 40; background: var(--ink); color: var(--card); padding: 10px 16px; border-radius: 999px; font-size: 14px; white-space: nowrap; }
   .prefill-note { text-align: center; font-size: 13px; color: var(--text3); margin: 8px 0 0; }
@@ -164,7 +167,7 @@
 <div class="sheet" id="sheet" hidden>
   <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
     <p class="sheet-title" id="sheet-title">An urge just came</p>
-    <p class="sheet-sub">What set it off? Optional</p>
+    <p class="sheet-sub">What set it off?</p>
     <div class="chips">
       <button type="button" class="chip" data-t="bored">Bored</button>
       <button type="button" class="chip" data-t="stressed">Stressed</button>
@@ -178,6 +181,8 @@
       <button type="button" class="out held" data-o="held">I held on</button>
       <button type="button" class="out happened" data-o="happened">It happened</button>
     </div>
+    <p class="sheet-sub">What exactly? Optional</p>
+    <textarea class="sheet-note" id="sheet-note" maxlength="300" placeholder="Where you were, what you were doing, what you saw. A few words is enough."></textarea>
     <button type="button" class="btn sheet-save" id="sheet-save" disabled>Save</button>
     <button type="button" class="sheet-cancel" id="sheet-cancel">Cancel</button>
   </div>
@@ -235,6 +240,7 @@
     sheet.querySelectorAll('.chip').forEach((c) => c.classList.remove('picked'));
     pickedOutcome = null;
     sheet.querySelectorAll('.out').forEach((b) => { b.classList.remove('picked'); b.setAttribute('aria-pressed', 'false'); });
+    noteEl.value = '';
     saveBtn.disabled = true;
     saveBtn.textContent = 'Save';
     sheet.hidden = false;
@@ -246,26 +252,32 @@
     sheet.querySelectorAll('.chip').forEach((x) => x.classList.remove('picked'));
     pickedTrigger = on ? c.dataset.t : null;
     if (on) c.classList.add('picked');
+    updateSave();
   }));
   const saveBtn = document.getElementById('sheet-save');
+  const noteEl = document.getElementById('sheet-note');
   let pickedOutcome = null;
+  // Both picks are required; the written detail is optional.
+  function updateSave() { saveBtn.disabled = !(pickedTrigger && pickedOutcome); }
   sheet.querySelectorAll('.out').forEach((b) => b.addEventListener('click', () => {
     pickedOutcome = b.dataset.o;
     sheet.querySelectorAll('.out').forEach((x) => {
       x.classList.toggle('picked', x === b);
       x.setAttribute('aria-pressed', String(x === b));
     });
-    saveBtn.disabled = false;
+    updateSave();
   }));
   saveBtn.addEventListener('click', async () => {
-    if (!pickedOutcome) return;
+    if (!pickedTrigger || !pickedOutcome) return;
     const outcome = pickedOutcome;
+    const trigger = pickedTrigger;
+    const note = noteEl.value.trim().slice(0, 300) || null;
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving...';
     try {
-      const res = await rpc('log_moment', { p_token: token, p_trigger: pickedTrigger, p_outcome: outcome });
+      const res = await rpc('log_moment', { p_token: token, p_trigger: trigger, p_outcome: outcome, p_note: note });
       if (!res || !res.id) throw new Error('rejected');
-      currentPlan.logs = [...(currentPlan.logs || []), { id: res.id, day: res.day, trigger: pickedTrigger, outcome, at: res.at }];
+      currentPlan.logs = [...(currentPlan.logs || []), { id: res.id, day: res.day, trigger, outcome, note, at: res.at }];
       closeSheet();
       render(currentPlan);
       toast(outcome === 'held' ? 'Saved. You held on.' : 'Saved. Keep going with your day.');
@@ -483,9 +495,11 @@
         dayLogs.slice().reverse().forEach((l) => {
           const li = el('li');
           const time = new Date(l.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+          const what = el('span', 'lw', TRIGGERS[l.trigger] || 'No tag');
+          if (l.note) what.append(el('span', 'ln', l.note));
           li.append(
             el('span', 'lt', time),
-            el('span', 'lw', TRIGGERS[l.trigger] || 'No tag'),
+            what,
             el('span', `lo ${l.outcome}`, l.outcome === 'held' ? 'Held on' : 'It happened'),
           );
           const x = el('button', 'lx', '×');
