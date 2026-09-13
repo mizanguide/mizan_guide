@@ -129,15 +129,24 @@ one of the sources the answer draws from or names. What this actually took:
   **The FAQPage JSON-LD text must stay word-for-word identical to the visible FAQ section** —
   Google and other engines treat a mismatch as a spam signal, so editing one without the other
   is a real bug, not just inconsistent copy.
-- **A real, visible FAQ section** (`#faq-section`, six questions) answering the exact phrasings
-  people actually search: is watching porn haram, is masturbation haram, do I need ghusl after
-  watching porn, will Allah forgive me, what do I say when the urge comes, how does Mizan help.
-  This is the actual lever, more than any of the technical files above — GEO research
-  consistently shows direct, structured, quotable answers to real query phrasing get cited far
-  more than technical markup alone. Every citation is live-verified (Khattab translation,
-  brackets rendered as parentheses) the same as the rest of this site's content rules, and the
-  ghusl answer follows the same "ghusl not wudu after release, not from watching alone" rule
-  already fixed in Case 002.
+- **A real, visible FAQ section** (`#faq-section`, ten questions) answering the exact phrasings
+  people actually search. This is the actual lever, more than any of the technical files above —
+  GEO research consistently shows direct, structured, quotable answers to real query phrasing get
+  cited far more than technical markup alone. Every citation is live-verified (Khattab
+  translation, brackets rendered as parentheses) the same as the rest of this site's content
+  rules, and the ghusl answer follows the same "ghusl not wudu after release, not from watching
+  alone" rule already fixed in Case 002.
+  **First pass (2026-09-14, corrected same day):** shipped six fiqh-lawyer questions (is watching
+  porn haram, is masturbation haram, etc). Anas called this out immediately, real people search
+  the recovery question, not the fiqh question, and a quick check against actual competitors
+  already ranking here (IslamOnline, AboutIslam, IslamWeb, MyTazkiyah) confirmed "how to quit porn
+  as a Muslim" is the real head query, not "is it haram." Added four more the same day and put
+  the master query first: how do I quit porn addiction as a Muslim, why can't I stop even though I
+  know it's haram, is nofap sunnah or a secular trend, how many times will Allah forgive the same
+  sin (Sahih al-Bukhari 7507, the same hadith already quoted in the proof section, extended here
+  to answer the relapse-guilt question directly). Lesson: match the real search intent (recovery,
+  "how do I stop") before the doctrinal question (fiqh, "is this haram"), people searching this
+  space are trying to quit, not asking for a ruling.
 - **What Claude cannot do:** create a Google Search Console or Bing Webmaster Tools account
   (account creation is off-limits). Anas has to do the one-time signup and verification himself,
   steps are in the daily reply that shipped this. Once verified, submitting the sitemap URL
