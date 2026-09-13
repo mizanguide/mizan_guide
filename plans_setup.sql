@@ -154,3 +154,7 @@ grant execute on function public.set_lead_payment(text, text) to anon;
 
 -- New columns and functions are invisible to the API until its schema cache reloads.
 notify pgrst, 'reload schema';
+
+-- Later migration, 2026-09-13: the check-in also records how many times it happened that day,
+-- and submit_checkin / get_plan carry the count. See checkin_times.sql, which must be run after
+-- everything above (it replaces the 4-argument submit_checkin with a 5-argument one).

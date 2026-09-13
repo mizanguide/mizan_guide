@@ -88,6 +88,22 @@
   .sent { text-align: center; color: var(--text2); margin: 0; }
   .err { color: var(--terracotta); font-size: 14px; text-align: center; margin: var(--sp-1) 0 0; min-height: 20px; }
 
+  .q2 { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 19px; color: var(--deep); margin: var(--sp-3) 0 var(--sp-1); text-align: center; }
+  .times { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .times button { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--hairline); background: var(--cream); font-size: 22px; font-weight: 700; color: var(--deep); cursor: pointer; line-height: 1; }
+  .times input { width: 84px; height: 48px; text-align: center; font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 26px; color: var(--ink); background: var(--cream); border: 2px solid var(--hairline); border-radius: 10px; margin: 0; padding: 0; -moz-appearance: textfield; }
+  .times input::-webkit-inner-spin-button, .times input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .times input:focus { outline: none; border-color: var(--sage); }
+
+  /* Times-per-day chart: one series, one hue, no legend (the title names it), thin bars with a
+     rounded data end on a shared baseline, value labels only on the first and latest bars,
+     tap or hover a bar for its value. */
+  .chart { margin-top: 18px; }
+  .chart-title { font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); font-weight: 700; margin-bottom: 6px; }
+  .chart svg { width: 100%; height: auto; display: block; }
+  .chart .cap { font-size: 13px; color: var(--text2); text-align: center; margin: 4px 0 0; min-height: 18px; }
+  .chart .empty { font-size: 13px; color: var(--text3); text-align: center; padding: 12px 0; margin: 0; background: var(--cream); border-radius: 10px; }
+
   details { background: var(--card); border: 2px solid var(--hairline); border-radius: 12px; padding: 12px 16px; margin-top: var(--sp-1); }
   details summary { cursor: pointer; font-weight: 700; color: var(--text2); }
   details .step { margin-top: var(--sp-1); }
@@ -147,7 +163,76 @@
     app.replaceChildren(s);
   }
 
-  function buildDashboard(checkins, publishedCount, todayDay, total) {
+  function buildChart(timesByDay, todayDay, total) {
+    const wrap = el('div', 'chart');
+    wrap.append(el('div', 'chart-title', 'Times per day'));
+    const recorded = [...timesByDay.keys()].sort((a, b) => a - b);
+    if (!recorded.length) {
+      wrap.append(el('p', 'empty', 'Your count shows up here after your first check-in.'));
+      return wrap;
+    }
+    const plural = (v) => `${v} ${v === 1 ? 'time' : 'times'}`;
+    const W = 300, H = 120, top = 18, base = 98;
+    const max = Math.max(1, ...timesByDay.values());
+    const step = W / total;
+    const bw = Math.max(4, step - 4);
+    const ns = 'http://www.w3.org/2000/svg';
+    const mk = (tag, attrs, text) => {
+      const n = document.createElementNS(ns, tag);
+      Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+      if (text != null) n.textContent = text;
+      return n;
+    };
+    const svg = mk('svg', {
+      viewBox: `0 0 ${W} ${H}`, role: 'img',
+      'aria-label': 'Times per day. ' + recorded.map((d) => `Day ${d}: ${plural(timesByDay.get(d))}`).join('. '),
+    });
+    svg.append(mk('line', { x1: 0, x2: W, y1: top, y2: top, stroke: '#ddd6c2', 'stroke-width': 1, 'stroke-dasharray': '2 3' }));
+    svg.append(mk('text', { x: W, y: top - 5, 'text-anchor': 'end', 'font-size': 9, fill: '#6b6353' }, String(max)));
+    svg.append(mk('line', { x1: 0, x2: W, y1: base, y2: base, stroke: '#ddd6c2', 'stroke-width': 1 }));
+
+    const first = recorded[0];
+    const last = recorded[recorded.length - 1];
+    const defaultCap = first === last
+      ? `Day ${first}: ${plural(timesByDay.get(first))}`
+      : `Day ${first}: ${plural(timesByDay.get(first))}. Day ${last}: ${plural(timesByDay.get(last))}.`;
+    const cap = el('p', 'cap', defaultCap);
+
+    for (let d = 1; d <= total; d++) {
+      const cx = step * (d - 0.5);
+      const g = mk('g', {});
+      if (timesByDay.has(d)) {
+        const v = timesByDay.get(d);
+        const h = v === 0 ? 2 : Math.max(4, (v / max) * (base - top));
+        const x = cx - bw / 2;
+        const y = base - h;
+        const r = Math.min(4, bw / 2, h);
+        g.append(mk('path', {
+          d: `M${x},${base} V${y + r} Q${x},${y} ${x + r},${y} H${x + bw - r} Q${x + bw},${y} ${x + bw},${y + r} V${base} Z`,
+          fill: '#4A6B52',
+        }));
+        if (d === first || d === last || v === 0) {
+          g.append(mk('text', { x: cx, y: y - 4, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 700, fill: '#2A2A20' }, String(v)));
+        }
+        g.append(mk('title', {}, `Day ${d}: ${plural(v)}`));
+        g.append(mk('rect', { x: cx - step / 2, y: 0, width: step, height: base, fill: 'transparent' }));
+        g.style.cursor = 'pointer';
+        const show = () => { cap.textContent = `Day ${d}: ${plural(v)}`; };
+        g.addEventListener('mouseenter', show);
+        g.addEventListener('click', show);
+        g.addEventListener('mouseleave', () => { cap.textContent = defaultCap; });
+      }
+      g.append(mk('text', {
+        x: cx, y: base + 14, 'text-anchor': 'middle', 'font-size': 9,
+        fill: d === todayDay ? '#C77B4D' : '#6b6353', 'font-weight': d === todayDay ? 700 : 400,
+      }, String(d)));
+      svg.append(g);
+    }
+    wrap.append(svg, cap);
+    return wrap;
+  }
+
+  function buildDashboard(checkins, publishedCount, todayDay, total, timesByDay) {
     const vals = [...checkins.values()];
     const doneN = vals.filter((v) => v === 'done').length;
     const partlyN = vals.filter((v) => v === 'partly').length;
@@ -183,6 +268,7 @@
     });
     top.append(ring, stats);
     dash.append(top);
+    dash.append(buildChart(timesByDay || new Map(), todayDay, total));
 
     for (let w = 0; w < Math.ceil(total / 7); w++) {
       dash.append(el('div', 'week-label', `Week ${w + 1}`));
@@ -232,7 +318,8 @@
     const prog = el('section', 'progress');
     prog.append(el('p', 't', `Day ${today.day} of ${total}`));
     app.append(prog);
-    app.append(buildDashboard(checkins, days.length, today.day, total));
+    const timesByDay = new Map((plan.checkins || []).filter((c) => c.times != null).map((c) => [c.day, c.times]));
+    app.append(buildDashboard(checkins, days.length, today.day, total, timesByDay));
 
     const card = el('section', 'card');
     card.append(el('div', 'label', "Today's step"), el('h2', null, today.title), el('p', 'step', today.step));
@@ -249,6 +336,31 @@
       const row = el('div', 'choices');
       const send = el('button', 'btn', 'Send');
       send.disabled = true;
+      const timesInput = el('input');
+      timesInput.type = 'number';
+      timesInput.min = '0';
+      timesInput.max = '99';
+      timesInput.inputMode = 'numeric';
+      timesInput.placeholder = '';
+      timesInput.setAttribute('aria-label', 'How many times today');
+      const updateSend = () => { send.disabled = !(choice && timesInput.value !== ''); };
+      timesInput.addEventListener('input', updateSend);
+      const bump = (d) => {
+        const cur = timesInput.value === '' ? null : Number(timesInput.value);
+        const next = cur === null ? (d > 0 ? 1 : 0) : Math.max(0, Math.min(99, cur + d));
+        timesInput.value = String(next);
+        updateSend();
+      };
+      const minus = el('button', null, '−');
+      const plus = el('button', null, '+');
+      minus.type = 'button';
+      plus.type = 'button';
+      minus.setAttribute('aria-label', 'One less');
+      plus.setAttribute('aria-label', 'One more');
+      minus.addEventListener('click', () => bump(-1));
+      plus.addEventListener('click', () => bump(1));
+      const timesRow = el('div', 'times');
+      timesRow.append(minus, timesInput, plus);
       CHOICES.forEach(([val, label]) => {
         const b = el('button', 'choice', label);
         b.type = 'button';
@@ -256,7 +368,7 @@
           choice = val;
           row.querySelectorAll('.choice').forEach((x) => x.classList.remove('picked'));
           b.classList.add('picked');
-          send.disabled = false;
+          updateSend();
         });
         row.append(b);
       });
@@ -265,12 +377,13 @@
       note.maxLength = 2000;
       const err = el('p', 'err');
       send.addEventListener('click', async () => {
-        if (!choice) return;
+        if (!choice || timesInput.value === '') return;
+        const times = Math.max(0, Math.min(99, Math.round(Number(timesInput.value))));
         send.disabled = true;
         send.textContent = 'Sending...';
         err.textContent = '';
         try {
-          const ok = await rpc('submit_checkin', { p_token: token, p_day: today.day, p_did_it: choice, p_note: note.value || null });
+          const ok = await rpc('submit_checkin', { p_token: token, p_day: today.day, p_did_it: choice, p_note: note.value || null, p_times: times });
           if (ok !== true) throw new Error('rejected');
           try {
             emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
@@ -278,10 +391,10 @@
               email: 'not given',
               struggle: note.value.trim() || 'no note',
               timing: CHOICES.find((c) => c[0] === choice)[1],
-              duration: 'n/a', tried: 'n/a', more: 'n/a',
+              duration: `${times} ${times === 1 ? 'time' : 'times'} today`, tried: 'n/a', more: 'n/a',
             }).catch(() => {});
           } catch (e) {}
-          plan.checkins = [...(plan.checkins || []).filter((c) => c.day !== today.day), { day: today.day, did_it: choice }];
+          plan.checkins = [...(plan.checkins || []).filter((c) => c.day !== today.day), { day: today.day, did_it: choice, times }];
           render(plan);
         } catch (e) {
           send.disabled = false;
@@ -289,7 +402,7 @@
           err.textContent = 'That did not go through. Please try again, or message us directly.';
         }
       });
-      ci.append(row, note, send, err);
+      ci.append(row, el('p', 'q2', 'How many times did it happen today?'), timesRow, note, send, err);
     }
     app.append(ci);
 
