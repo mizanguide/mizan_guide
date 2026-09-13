@@ -103,6 +103,51 @@ first tap. Judge it on visit-to-submit rate after 2026-09-12 versus the 12.5% be
   `log_notes.sql`, THEN push. Any SQL that drops or replaces a function goes first, with the push right after. The form writes `ref`, so pushing before the
   SQL makes every submission fail.
 
+## AI search visibility (AEO/GEO), added 2026-09-14
+
+The goal: when someone asks ChatGPT, Perplexity, Gemini, Google AI Overviews, or Claude a
+question like "is watching porn haram" or "how do I stop watching porn as a Muslim", Mizan is
+one of the sources the answer draws from or names. What this actually took:
+
+- **`robots.txt`** explicitly allows every major AI crawler by name (GPTBot, OAI-SearchBot,
+  ChatGPT-User, ClaudeBot, Claude-User, Claude-SearchBot, anthropic-ai, PerplexityBot,
+  Perplexity-User, Google-Extended, Applebot-Extended, CCBot, Bingbot), plus a wildcard allow.
+  **Real limitation, not fixed by this file alone:** the live site is a project page
+  (`mizanguide.github.io/mizan_guide/`), not a domain root, so `robots.txt` here is not read by
+  the spec-correct location crawlers actually check (`mizanguide.github.io/robots.txt`, a
+  different repo). This file is still worth having (ready for a future custom domain, and some
+  tools check it loosely anyway) but it is not the fix for the root-domain problem. **Moving
+  Mizan to its own domain (e.g. mizan.guide, if available) is the single highest-leverage
+  structural change for both AEO and ordinary SEO** — it is the only way to get a real,
+  authoritative `robots.txt`, and a real domain accrues backlink and entity authority a GitHub
+  Pages subpath never will.
+- **`sitemap.xml`** lists the one real public page. `plan.html` is deliberately excluded, it is
+  private and already noindex.
+- **`llms.txt`** — an emerging, informal convention some AI crawlers read as a quick summary of
+  what the site is and what it answers. Low cost, no downside, added at the site's own path.
+- **JSON-LD structured data** in `index.html`: an `Organization` block and a `FAQPage` block.
+  **The FAQPage JSON-LD text must stay word-for-word identical to the visible FAQ section** —
+  Google and other engines treat a mismatch as a spam signal, so editing one without the other
+  is a real bug, not just inconsistent copy.
+- **A real, visible FAQ section** (`#faq-section`, six questions) answering the exact phrasings
+  people actually search: is watching porn haram, is masturbation haram, do I need ghusl after
+  watching porn, will Allah forgive me, what do I say when the urge comes, how does Mizan help.
+  This is the actual lever, more than any of the technical files above — GEO research
+  consistently shows direct, structured, quotable answers to real query phrasing get cited far
+  more than technical markup alone. Every citation is live-verified (Khattab translation,
+  brackets rendered as parentheses) the same as the rest of this site's content rules, and the
+  ghusl answer follows the same "ghusl not wudu after release, not from watching alone" rule
+  already fixed in Case 002.
+- **What Claude cannot do:** create a Google Search Console or Bing Webmaster Tools account
+  (account creation is off-limits). Anas has to do the one-time signup and verification himself,
+  steps are in the daily reply that shipped this. Once verified, submitting the sitemap URL
+  through each tool is what gets crawled fast, rather than waiting for organic discovery.
+- **What this does not touch:** the `Mizan/CaseStudies/` folder, which is real, long-form, sourced
+  Q&A content that would be strong AEO material, but it currently is not part of this repo at all
+  and is delivered privately (PDF/DM), never published. Publishing case studies changes their
+  shape from a paid-service deliverable to public content, that is a real product decision for
+  Anas, not something to flip silently.
+
 ## On-page event granularity, locked 2026-09-11
 
 Beyond `page_view`, `section_view` (fires once per section: `proof-section`, `offer-section`,

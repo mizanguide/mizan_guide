@@ -1,0 +1,26 @@
+# Mizan
+
+> Mizan gives Muslims a personalized, sourced plan to quit watching pornography, grounded in the Qur'an and the Sunnah, delivered as a private daily page after a small one time payment.
+
+Mizan is not an app and not a forum. A visitor answers a few short questions
+about their own situation, pays $5 once, and gets a private 14 day plan: one
+real step each day, built from how the previous day actually went, each step
+sourced with a verified citation from the Qur'an or an authentic hadith.
+
+## Key facts
+- Audience: Muslims trying to stop watching pornography or masturbating.
+- Approach: daily, personalized, sourced from Qur'an and Sunnah. Never generic advice.
+- Price: $5 one time for the full 14 days.
+- Privacy: fully anonymous. Nothing is posted or shared. Contact is by Instagram DM or email.
+- Contact: https://instagram.com/mizan.guide
+
+## Pages
+- [Start a plan](https://mizanguide.github.io/mizan_guide/): the intake questions, the paywall, and the FAQ.
+
+## Questions this site directly answers
+- Is watching porn haram in Islam?
+- Is masturbation haram in Islam?
+- Do I need ghusl after watching porn?
+- Will Allah forgive me for watching porn?
+- What can I say when the urge comes?
+- How does Mizan help someone quit?
