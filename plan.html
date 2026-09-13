@@ -130,9 +130,10 @@
   .chip.picked { border-color: var(--sage); background: #eef2ea; }
   .outs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .out { font-family: 'Karla'; font-weight: 700; font-size: 16px; border-radius: 12px; padding: 16px 10px; cursor: pointer; min-height: 56px; }
-  .out.held { background: var(--sage); color: var(--card); border: 2px solid var(--sage); }
-  .out.happened { background: var(--card); color: var(--ink); border: 2px solid var(--hairline); }
-  .out:disabled { opacity: 0.6; }
+  /* Both answers start neutral so neither looks pre-chosen; Save unlocks only once one is picked. */
+  .out { background: var(--cream); color: var(--ink); border: 2px solid var(--hairline); }
+  .out.picked { border-color: var(--sage); background: #eef2ea; color: var(--deep); }
+  .sheet-save { margin-top: var(--sp-3); }
   .sheet-cancel { display: block; margin: var(--sp-2) auto 0; background: none; border: none; font-family: 'Karla'; font-weight: 700; color: var(--text3); font-size: 14px; cursor: pointer; padding: 8px; }
   .toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 40; background: var(--ink); color: var(--card); padding: 10px 16px; border-radius: 999px; font-size: 14px; white-space: nowrap; }
   .prefill-note { text-align: center; font-size: 13px; color: var(--text3); margin: 8px 0 0; }
@@ -177,6 +178,7 @@
       <button type="button" class="out held" data-o="held">I held on</button>
       <button type="button" class="out happened" data-o="happened">It happened</button>
     </div>
+    <button type="button" class="btn sheet-save" id="sheet-save" disabled>Save</button>
     <button type="button" class="sheet-cancel" id="sheet-cancel">Cancel</button>
   </div>
 </div>
@@ -231,7 +233,10 @@
   function openSheet() {
     pickedTrigger = null;
     sheet.querySelectorAll('.chip').forEach((c) => c.classList.remove('picked'));
-    sheet.querySelectorAll('.out').forEach((b) => { b.disabled = false; });
+    pickedOutcome = null;
+    sheet.querySelectorAll('.out').forEach((b) => { b.classList.remove('picked'); b.setAttribute('aria-pressed', 'false'); });
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Save';
     sheet.hidden = false;
   }
   function closeSheet() { sheet.hidden = true; }
@@ -242,9 +247,21 @@
     pickedTrigger = on ? c.dataset.t : null;
     if (on) c.classList.add('picked');
   }));
-  sheet.querySelectorAll('.out').forEach((b) => b.addEventListener('click', async () => {
-    const outcome = b.dataset.o;
-    sheet.querySelectorAll('.out').forEach((x) => { x.disabled = true; });
+  const saveBtn = document.getElementById('sheet-save');
+  let pickedOutcome = null;
+  sheet.querySelectorAll('.out').forEach((b) => b.addEventListener('click', () => {
+    pickedOutcome = b.dataset.o;
+    sheet.querySelectorAll('.out').forEach((x) => {
+      x.classList.toggle('picked', x === b);
+      x.setAttribute('aria-pressed', String(x === b));
+    });
+    saveBtn.disabled = false;
+  }));
+  saveBtn.addEventListener('click', async () => {
+    if (!pickedOutcome) return;
+    const outcome = pickedOutcome;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
     try {
       const res = await rpc('log_moment', { p_token: token, p_trigger: pickedTrigger, p_outcome: outcome });
       if (!res || !res.id) throw new Error('rejected');
@@ -253,10 +270,11 @@
       render(currentPlan);
       toast(outcome === 'held' ? 'Saved. You held on.' : 'Saved. Keep going with your day.');
     } catch (e) {
-      sheet.querySelectorAll('.out').forEach((x) => { x.disabled = false; });
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
       toast('That did not save. Please try again.');
     }
-  }));
+  });
   document.getElementById('sheet-cancel').addEventListener('click', closeSheet);
   sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); });
   fab.addEventListener('click', openSheet);
