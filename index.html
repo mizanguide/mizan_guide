@@ -185,6 +185,11 @@
   }
   .opt:hover, .opt:focus { border-color: var(--sage); outline: none; }
   .opt.picked { border-color: var(--sage); background: #eef2ea; }
+  .step[data-multi="true"] .opt { position: relative; padding-right: 40px; }
+  .step[data-multi="true"] .opt.picked::after {
+    content: "\2713"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--sage); font-weight: 700; font-size: 16px;
+  }
   .step .field { max-width: 420px; margin: 0 auto var(--sp-2); }
   .step .other { display: none; }
   .step .other.on { display: block; margin-top: var(--sp-2); }
@@ -235,21 +240,22 @@
 
   <section class="cta" id="cta-section">
     <h2 class="section-title">Start your plan</h2>
-    <p>Six quick questions. Tap what fits, skip what you want. We reply by DM.</p>
+    <p>Six quick questions. Tap what fits, skip what you want. We reply by DM or email.</p>
 
     <form class="intake quiz" id="intake-form" novalidate>
       <div class="progress" id="quiz-progress">Question 1 of 6</div>
       <div class="bar"><i id="quiz-bar"></i></div>
 
-      <div class="step on" data-step="1" data-field="timing">
-        <div class="q">When does it usually happen?</div>
+      <div class="step on" data-step="1" data-field="timing" data-multi="true">
+        <input type="hidden" id="timing" name="timing">
+        <div class="q">When does it usually happen?<small>Pick all that fit.</small></div>
         <div class="opts">
           <button type="button" class="opt" data-val="Late night, after Isha">Late night, after Isha</button>
           <button type="button" class="opt" data-val="Alone at home during the day">Alone at home during the day</button>
           <button type="button" class="opt" data-val="It feels random">It feels random</button>
           <button type="button" class="opt" data-val="__other">Something else</button>
         </div>
-        <div class="field other"><input type="text" id="timing" name="timing" placeholder="When, in your own words"></div>
+        <div class="field other"><input type="text" id="timing_other" placeholder="When, in your own words"></div>
       </div>
 
       <div class="step" data-step="2" data-field="duration">
@@ -263,8 +269,9 @@
         <div class="field other"><input type="text" id="duration" name="duration" placeholder="How long, in your own words"></div>
       </div>
 
-      <div class="step" data-step="3" data-field="tried">
-        <div class="q">What have you already tried?</div>
+      <div class="step" data-step="3" data-field="tried" data-multi="true">
+        <input type="hidden" id="tried" name="tried">
+        <div class="q">What have you already tried?<small>Pick all that fit.</small></div>
         <div class="opts">
           <button type="button" class="opt" data-val="Blocking apps and sites">Blocking apps and sites</button>
           <button type="button" class="opt" data-val="Promising myself and making tawbah">Promising myself and making tawbah</button>
@@ -272,7 +279,7 @@
           <button type="button" class="opt" data-val="Nothing that stuck">Nothing that stuck</button>
           <button type="button" class="opt" data-val="__other">Something else</button>
         </div>
-        <div class="field other"><input type="text" id="tried" name="tried" placeholder="What you tried, in your own words"></div>
+        <div class="field other"><input type="text" id="tried_other" placeholder="What you tried, in your own words"></div>
       </div>
 
       <div class="step" data-step="4" data-field="struggle">
@@ -461,13 +468,39 @@
   }
 
   steps.forEach((step) => {
+    // On multi-select steps the first input is a hidden field holding the combined answer
+    // ("Late night, after Isha, It feels random"), so the payload and email stay unchanged.
+    const multi = step.dataset.multi === 'true';
     const input = step.querySelector('input, textarea');
     const otherWrap = step.querySelector('.other');
-    step.querySelectorAll('.opt').forEach((btn) => {
+    const otherInput = otherWrap ? otherWrap.querySelector('input') : null;
+    const opts = step.querySelectorAll('.opt');
+    const sync = () => {
+      const picked = [...opts]
+        .filter((b) => b.classList.contains('picked') && b.dataset.val !== '__other')
+        .map((b) => b.dataset.val);
+      if (otherWrap && otherWrap.classList.contains('on') && otherInput.value.trim()) picked.push(otherInput.value.trim());
+      input.value = picked.join(', ');
+    };
+    if (multi && otherInput) otherInput.addEventListener('input', sync);
+    opts.forEach((btn) => {
+      btn.setAttribute('aria-pressed', 'false');
       btn.addEventListener('click', () => {
         markStarted();
-        step.querySelectorAll('.opt').forEach((b) => b.classList.remove('picked'));
+        if (multi) {
+          const on = !btn.classList.contains('picked');
+          btn.classList.toggle('picked', on);
+          btn.setAttribute('aria-pressed', String(on));
+          if (btn.dataset.val === '__other') {
+            otherWrap.classList.toggle('on', on);
+            if (on) otherInput.focus({ preventScroll: true });
+          }
+          sync();
+          return;
+        }
+        opts.forEach((b) => { b.classList.remove('picked'); b.setAttribute('aria-pressed', 'false'); });
         btn.classList.add('picked');
+        btn.setAttribute('aria-pressed', 'true');
         if (btn.dataset.val === '__other') {
           otherWrap.classList.add('on');
           input.value = '';
