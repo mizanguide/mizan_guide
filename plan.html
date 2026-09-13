@@ -88,6 +88,7 @@
   .sent { text-align: center; color: var(--text2); margin: 0; }
   .err { color: var(--terracotta); font-size: 14px; text-align: center; margin: var(--sp-1) 0 0; min-height: 20px; }
 
+  .rule-note { text-align: center; font-size: 13px; color: var(--text3); margin: -8px 0 var(--sp-2); }
   .q2 { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 19px; color: var(--deep); margin: var(--sp-3) 0 var(--sp-1); text-align: center; }
   .times { display: flex; align-items: center; justify-content: center; gap: 10px; }
   .times button { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--hairline); background: var(--cream); font-size: 22px; font-weight: 700; color: var(--deep); cursor: pointer; line-height: 1; }
@@ -329,10 +330,12 @@
 
     const ci = el('section', 'card checkin');
     if (checkins.has(today.day)) {
-      ci.append(el('p', 'sent', "Got it. Tomorrow's step is built from what you told us."));
+      ci.append(el('p', 'sent', today.day >= total
+        ? 'Got it. That was your last day. We will be in touch about what comes next.'
+        : "Got it. Tomorrow's step is built from what you told us, and it will be here by 9am Pakistan time."));
     } else {
       let choice = null;
-      ci.append(el('p', 'q', "Did you do today's step?"));
+      ci.append(el('p', 'q', "Did you do today's step?"), el('p', 'rule-note', 'Check in right before you sleep. That closes your day.'));
       const row = el('div', 'choices');
       const send = el('button', 'btn', 'Send');
       send.disabled = true;
@@ -391,7 +394,7 @@
               email: 'not given',
               struggle: note.value.trim() || 'no note',
               timing: CHOICES.find((c) => c[0] === choice)[1],
-              duration: `${times} ${times === 1 ? 'time' : 'times'} today`, tried: 'n/a', more: 'n/a',
+              duration: `${times} ${times === 1 ? 'time' : 'times'} ${today.day === 1 ? 'in the last 24 hours' : 'today'}`, tried: 'n/a', more: 'n/a',
             }).catch(() => {});
           } catch (e) {}
           plan.checkins = [...(plan.checkins || []).filter((c) => c.day !== today.day), { day: today.day, did_it: choice, times }];
@@ -402,7 +405,10 @@
           err.textContent = 'That did not go through. Please try again, or message us directly.';
         }
       });
-      ci.append(row, el('p', 'q2', 'How many times did it happen today?'), timesRow, note, send, err);
+      // Day protocol: a day runs from waking up to sleeping, and this check-in closes it. Day 1
+      // asks about the last 24 hours so a plan started in the evening still gets a full baseline.
+      const countQ = today.day === 1 ? 'How many times in the last 24 hours?' : 'How many times today, since you woke up?';
+      ci.append(row, el('p', 'q2', countQ), timesRow, note, send, err);
     }
     app.append(ci);
 
