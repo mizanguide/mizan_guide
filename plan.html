@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Mizan · Your plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Karla:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* The token lives in the URL hash (never sent to any server), referrer is off, and this page
+     loads no analytics, so a person's plan link cannot leak through logs or third parties. */
+  :root {
+    color-scheme: light only;
+    --sage: #4A6B52; --deep: #35503B; --tint: #8FA890; --terracotta: #C77B4D;
+    --cream: #F2EEE1; --card: #FFFDF7; --ink: #2A2A20; --text2: #5c5347; --text3: #6b6353;
+    --hairline: #ddd6c2;
+    --sp-1: 8px; --sp-2: 16px; --sp-3: 24px; --sp-4: 40px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--cream); color: var(--ink); font-family: 'Karla', sans-serif; line-height: 1.6; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 20px; }
+
+  header { text-align: center; padding-top: 40px; }
+  .eyebrow { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--sage); font-weight: 700; }
+  .wordmark { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 34px; color: var(--deep); margin: var(--sp-1) 0 0; }
+  .rule { width: 32px; height: 2px; background: var(--terracotta); margin: var(--sp-2) auto 0; border: none; }
+
+  main { margin-top: var(--sp-4); }
+  .muted { text-align: center; color: var(--text3); }
+
+  .state { text-align: center; }
+  .state .t { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 24px; color: var(--deep); margin: 0 0 var(--sp-1); }
+  .state p { color: var(--text2); margin: 0 auto; max-width: 420px; }
+
+  .progress { text-align: center; }
+  .progress .t { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 26px; color: var(--deep); margin: 0; }
+  .dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--sp-2); }
+  .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--hairline); background: transparent; }
+  .dot.done { background: var(--sage); border-color: var(--sage); }
+  .dot.partly { background: var(--tint); border-color: var(--tint); }
+  .dot.open { border-color: var(--sage); }
+  .dot.current { box-shadow: 0 0 0 3px var(--cream), 0 0 0 5px var(--terracotta); }
+
+  .card { background: var(--card); border: 2px solid var(--hairline); border-radius: 14px; padding: 22px 20px; margin-top: var(--sp-3); }
+  .label { font-size: 11.5px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--sage); font-weight: 700; margin-bottom: var(--sp-1); }
+  .card h2 { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 24px; line-height: 1.3; color: var(--ink); margin: 0 0 var(--sp-2); }
+  .step { font-size: 16px; white-space: pre-line; margin: 0; }
+  .why { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 18px; line-height: 1.5; margin: var(--sp-3) 0 0; white-space: pre-line; }
+  .source { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--terracotta); font-weight: 700; margin-top: var(--sp-1); }
+
+  .checkin .q { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 21px; color: var(--deep); margin: 0 0 var(--sp-2); text-align: center; }
+  .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .choice { font-family: 'Karla'; font-size: 15px; font-weight: 600; color: var(--ink); background: var(--cream); border: 2px solid var(--hairline); border-radius: 10px; padding: 12px 6px; cursor: pointer; min-height: 48px; }
+  .choice.picked { border-color: var(--sage); background: #eef2ea; }
+  textarea { width: 100%; margin-top: var(--sp-2); font-family: 'Karla'; font-size: 15px; color: var(--ink); background: var(--cream); border: 2px solid var(--hairline); border-radius: 10px; padding: 11px 13px; min-height: 80px; resize: vertical; }
+  textarea:focus, .choice:focus { outline: none; border-color: var(--sage); }
+  .btn { display: block; width: 100%; margin-top: var(--sp-2); background: var(--sage); color: var(--card); font-family: 'Karla'; font-weight: 700; font-size: 15px; padding: 14px; border: none; border-radius: 999px; cursor: pointer; }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .sent { text-align: center; color: var(--text2); margin: 0; }
+  .err { color: var(--terracotta); font-size: 14px; text-align: center; margin: var(--sp-1) 0 0; min-height: 20px; }
+
+  details { background: var(--card); border: 2px solid var(--hairline); border-radius: 12px; padding: 12px 16px; margin-top: var(--sp-1); }
+  details summary { cursor: pointer; font-weight: 700; color: var(--text2); }
+  details .step { margin-top: var(--sp-1); }
+  .earlier { margin-top: var(--sp-4); }
+  .earlier > .label { text-align: center; }
+
+  footer { text-align: center; margin-top: var(--sp-4); padding-bottom: 40px; }
+  footer .w { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px; color: var(--sage); }
+  footer .h { font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--text3); font-weight: 700; margin-top: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bismillah</div>
+    <div class="wordmark">Your plan</div>
+    <hr class="rule">
+  </header>
+  <main id="app"><p class="muted">Loading your plan...</p></main>
+  <footer><div class="w">Mizan</div><div class="h">@mizan.guide</div></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://wxwuxajfnefabiipgptx.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d3V4YWpmbmVmYWJpaXBncHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NjE3MjAsImV4cCI6MjEwNDMzNzcyMH0.3OiKcmOfX4KCp-OjaHdBIo7HJeMUjX_XozxlhUF-3fA';
+  const EMAILJS_PUBLIC_KEY = 'QM5B6uhuH-kM3u-T2';
+  const EMAILJS_SERVICE_ID = 'service_xohz5c2';
+  const EMAILJS_TEMPLATE_ID = 'template_9kl5nrd';
+  try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch (e) {}
+
+  const CHOICES = [['done', 'Done'], ['partly', 'Partly'], ['not_yet', 'Not yet']];
+  const app = document.getElementById('app');
+  const token = decodeURIComponent(location.hash.slice(1)).trim();
+  const TOKEN_OK = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token);
+
+  function el(tag, cls, text) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  async function rpc(fn, body) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error('Request failed: ' + res.status);
+    return res.json();
+  }
+
+  function showState(title, text) {
+    const s = el('section', 'state');
+    s.append(el('p', 't', title), el('p', null, text));
+    app.replaceChildren(s);
+  }
+
+  function render(plan) {
+    if (!plan) {
+      showState('Your plan starts once payment is confirmed.',
+        "We'll message you the moment Day 1 is ready. Keep this link, it's yours and only yours.");
+      return;
+    }
+    const days = plan.days || [];
+    if (!days.length) {
+      showState('Day 1 is being written from your answers.',
+        'It will appear right here soon. Keep this link, it is yours and only yours.');
+      return;
+    }
+    const checkins = new Map((plan.checkins || []).map((c) => [c.day, c.did_it]));
+    const today = days[days.length - 1];
+    const total = plan.total_days || 14;
+    app.replaceChildren();
+
+    const prog = el('section', 'progress');
+    prog.append(el('p', 't', `Day ${today.day} of ${total}`));
+    const dots = el('div', 'dots');
+    for (let i = 1; i <= total; i++) {
+      const state = checkins.get(i);
+      const d = el('span', 'dot');
+      if (state === 'done') d.classList.add('done');
+      else if (state === 'partly') d.classList.add('partly');
+      else if (i <= today.day) d.classList.add('open');
+      if (i === today.day) d.classList.add('current');
+      d.title = `Day ${i}`;
+      dots.append(d);
+    }
+    prog.append(dots);
+    app.append(prog);
+
+    const card = el('section', 'card');
+    card.append(el('div', 'label', "Today's step"), el('h2', null, today.title), el('p', 'step', today.step));
+    if (today.why) card.append(el('p', 'why', today.why));
+    if (today.source) card.append(el('div', 'source', today.source));
+    app.append(card);
+
+    const ci = el('section', 'card checkin');
+    if (checkins.has(today.day)) {
+      ci.append(el('p', 'sent', "Got it. Tomorrow's step is built from what you told us."));
+    } else {
+      let choice = null;
+      ci.append(el('p', 'q', "Did you do today's step?"));
+      const row = el('div', 'choices');
+      const send = el('button', 'btn', 'Send');
+      send.disabled = true;
+      CHOICES.forEach(([val, label]) => {
+        const b = el('button', 'choice', label);
+        b.type = 'button';
+        b.addEventListener('click', () => {
+          choice = val;
+          row.querySelectorAll('.choice').forEach((x) => x.classList.remove('picked'));
+          b.classList.add('picked');
+          send.disabled = false;
+        });
+        row.append(b);
+      });
+      const note = el('textarea');
+      note.placeholder = 'Anything that would help us shape tomorrow\'s step? (optional)';
+      note.maxLength = 2000;
+      const err = el('p', 'err');
+      send.addEventListener('click', async () => {
+        if (!choice) return;
+        send.disabled = true;
+        send.textContent = 'Sending...';
+        err.textContent = '';
+        try {
+          const ok = await rpc('submit_checkin', { p_token: token, p_day: today.day, p_did_it: choice, p_note: note.value || null });
+          if (ok !== true) throw new Error('rejected');
+          try {
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+              instagram: `Check-in, plan ${plan.ref}, day ${today.day}`,
+              email: 'not given',
+              struggle: note.value.trim() || 'no note',
+              timing: CHOICES.find((c) => c[0] === choice)[1],
+              duration: 'n/a', tried: 'n/a', more: 'n/a',
+            }).catch(() => {});
+          } catch (e) {}
+          plan.checkins = [...(plan.checkins || []).filter((c) => c.day !== today.day), { day: today.day, did_it: choice }];
+          render(plan);
+        } catch (e) {
+          send.disabled = false;
+          send.textContent = 'Send';
+          err.textContent = 'That did not go through. Please try again, or message us directly.';
+        }
+      });
+      ci.append(row, note, send, err);
+    }
+    app.append(ci);
+
+    if (days.length > 1) {
+      const earlier = el('section', 'earlier');
+      earlier.append(el('div', 'label', 'Earlier days'));
+      days.slice(0, -1).reverse().forEach((d) => {
+        const det = el('details');
+        det.append(el('summary', null, `Day ${d.day}: ${d.title}`), el('p', 'step', d.step));
+        earlier.append(det);
+      });
+      app.append(earlier);
+    }
+  }
+
+  // A change after the # is a same-page navigation with no reload, which would leave `token`
+  // stale. Reloading keeps the page and the link it was opened with always in step.
+  window.addEventListener('hashchange', () => location.reload());
+
+  if (!TOKEN_OK) {
+    showState("This link doesn't look right.", 'Message us on Instagram at @mizan.guide and we will send your plan link again.');
+  } else {
+    rpc('get_plan', { p_token: token })
+      .then(render)
+      .catch(() => showState('We could not load your plan just now.', 'Please refresh in a minute. If it keeps happening, message us at @mizan.guide.'));
+  }
+</script>
+</body>
+</html>

@@ -286,10 +286,10 @@
       </div>
 
       <div class="step" data-step="6" data-field="ig">
-        <div class="q">Where should we send your first step?<small>We reply by DM, not an autoreply.</small></div>
+        <div class="q">Where should we send your first step?<small>We reply by DM or email, not an autoreply.</small></div>
         <div class="field">
-          <label for="ig">Your Instagram username</label>
-          <input type="text" id="ig" name="instagram" placeholder="@yourusername" required>
+          <label for="ig">Your Instagram username or email</label>
+          <input type="text" id="ig" name="instagram" placeholder="@yourusername or you@email.com" required>
         </div>
         <div class="field">
           <label for="email">Email <span class="hint">(optional, in case a DM does not reach you)</span></label>
@@ -308,7 +308,7 @@
 
     <div class="thanks" id="thanks-card" hidden>
       <div class="t">Got it.</div>
-      <p id="thanks-text">We read every one of these ourselves. Expect a DM from us soon, not an autoreply, with your first step and how to send the $5.</p>
+      <p id="thanks-text">We read every one of these ourselves. Expect a message from us soon, by DM or email, not an autoreply, with how to send the $5 and your first step.</p>
     </div>
 
     <p class="fallback-link"><a class="btn-ghost" id="dm-fallback-link" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
@@ -509,7 +509,7 @@
     statusEl.classList.remove('error');
     const ig = document.getElementById('ig').value.trim();
     if (!ig) {
-      statusEl.textContent = 'Instagram username is required so we can reply.';
+      statusEl.textContent = 'Add your Instagram username or email so we can reply.';
       statusEl.classList.add('error');
       return;
     }
