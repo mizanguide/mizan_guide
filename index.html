@@ -236,8 +236,6 @@
   .paywall .btn { display: block; width: 100%; margin-top: var(--sp-3); }
   .pay-note { font-size: 14.5px; color: var(--text2); text-align: center; margin: var(--sp-2) 0 0; min-height: 20px; }
   .pay-note.error { color: var(--terracotta); }
-  .abroad { text-align: center; margin: var(--sp-1) 0 0; }
-  .abroad .back { font-size: 13.5px; text-decoration: underline; }
 
   .fallback-link { margin-top: var(--sp-3); text-align: center; }
 
@@ -355,7 +353,6 @@
       </div>
       <button type="button" class="btn" id="paid-btn" hidden>I've sent the $5</button>
       <p class="pay-note" id="pay-note"></p>
-      <p class="abroad"><button type="button" class="back" id="abroad-btn">Outside Pakistan? Tap here and we'll send you a card link</button></p>
     </div>
 
     <p class="fallback-link"><a class="btn-ghost" id="dm-fallback-link" href="https://instagram.com/mizan.guide" target="_blank" rel="noopener">Or DM us on Instagram directly</a></p>
@@ -478,7 +475,6 @@
   const paywall = document.getElementById('paywall');
   const payNote = document.getElementById('pay-note');
   const paidBtn = document.getElementById('paid-btn');
-  const abroadBtn = document.getElementById('abroad-btn');
   let leadRef = null;
   let leadContact = null;
 
@@ -551,19 +547,16 @@
 
   async function setPayment(status, doneText, subject, eventName) {
     paidBtn.disabled = true;
-    abroadBtn.disabled = true;
     payNote.classList.remove('error');
     try {
       const ok = await rpc('set_lead_payment', { p_ref: leadRef, p_status: status });
       if (ok !== true) throw new Error('rejected');
       paidBtn.hidden = true;
-      abroadBtn.parentElement.hidden = true;
       payNote.textContent = doneText;
       notifyAnas(`${subject} ${leadRef}, ${leadContact}`);
       logEvent(eventName);
     } catch (e) {
       paidBtn.disabled = false;
-      abroadBtn.disabled = false;
       payNote.textContent = `That did not go through. Please try again, or DM us at @mizan.guide with your code ${leadRef}.`;
       payNote.classList.add('error');
     }
@@ -572,9 +565,6 @@
   paidBtn.addEventListener('click', () => setPayment('claimed',
     `Thank you. We will check the transfer and send your private plan link to ${leadContact} today.`,
     'PAYMENT CLAIMED', 'payment_claimed'));
-  abroadBtn.addEventListener('click', () => setPayment('wants_card',
-    `Got it. We will send a card payment link to ${leadContact} as soon as it is ready.`,
-    'WANTS CARD LINK', 'payment_wants_card'));
 
   let formStarted = false;
   function markStarted() {
