@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light only">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<title>Mizan · Your plan</title>
+<title>Quitnafs · Your plan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Karla:wght@400;600;700&display=swap" rel="stylesheet">
@@ -161,7 +161,7 @@
     <hr class="rule">
   </header>
   <main id="app"><p class="muted">Loading your plan...</p></main>
-  <footer><div class="w">Mizan</div><div class="h">@mizan.guide</div></footer>
+  <footer><div class="w">Quitnafs</div><div class="h">@quitnafs</div></footer>
 </div>
 
 <button type="button" class="fab" id="fab" hidden>+ Log a moment</button>
@@ -642,11 +642,11 @@
   window.addEventListener('hashchange', () => location.reload());
 
   if (!TOKEN_OK) {
-    showState("This link doesn't look right.", 'Message us on Instagram at @mizan.guide and we will send your plan link again.');
+    showState("This link doesn't look right.", 'Message us on Instagram at @quitnafs and we will send your plan link again.');
   } else {
     rpc('get_plan', { p_token: token })
       .then(render)
-      .catch(() => showState('We could not load your plan just now.', 'Please refresh in a minute. If it keeps happening, message us at @mizan.guide.'));
+      .catch(() => showState('We could not load your plan just now.', 'Please refresh in a minute. If it keeps happening, message us at @quitnafs.'));
   }
 </script>
 </body>
