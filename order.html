@@ -94,9 +94,11 @@
   const EMAILJS_SERVICE_ID = 'service_xohz5c2';
   const EMAILJS_TEMPLATE_ID = 'template_9kl5nrd';
 
-  const params = new URLSearchParams(location.search);
-  const ref = (params.get('ref') || '').toUpperCase();
-  const cancelled = params.get('cancelled') === '1';
+  // Safepay appends its own "?order_id=...&tracker=..." to the return URL, so read the order code
+  // and the cancelled flag straight from the raw query string rather than trusting one clean "?".
+  const rawQuery = decodeURIComponent(location.search + location.hash).toUpperCase();
+  const ref = (rawQuery.match(/MZ-[A-Z0-9]{5}/) || [''])[0];
+  const cancelled = /CANCELLED=1/.test(rawQuery);
   const $ = (id) => document.getElementById(id);
 
   async function safepay(action) {
