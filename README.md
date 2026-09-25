@@ -171,3 +171,29 @@ yes/no signal.
 Never commit the Supabase `service_role` / secret key anywhere in this folder. It grants full
 database access and this repo is public. The anon key and the EmailJS public key are both safe
 by design (insert-only / template-locked respectively), the Supabase secret key is not.
+
+## Safepay checkout, policies and contact page, added 2026-09-25
+
+Built for Safepay's KYC review, which asked for a screen recording of the full site: features,
+pricing, terms, policies, the customer journey to checkout, the Safepay payment flow with order
+confirmation, and support contact.
+
+- **Pages:** `terms.html`, `privacy.html`, `refund.html` (refund and cancellation, 7-day full
+  refund), `delivery.html`, `contact.html`, all styled by `legal.css` and linked from every
+  footer. A pricing section (`#pricing-section`) sits on the home page.
+- **Paywall:** "Pay Rs 1,400 with Safepay" is now the primary button. Bank transfer stays as a
+  folded fallback under it, same flow as before.
+- **Checkout:** the button calls the `safepay` Supabase edge function (source in
+  `Mizan/App/supabase/functions/safepay/`, outside this repo) with the order code. The function
+  reads the price from `mizan_settings`, opens a Safepay v3 payment session, and returns the
+  hosted checkout URL. Safepay sends the payer back to `order.html?ref=MZ-XXXXX`, which asks the
+  function to verify. The function checks the tracker with Safepay's reporter API
+  (`TRACKER_ENDED` = paid), then sets `payment_status = 'paid'`, `paid_at`, `paid_amount_pkr`
+  and `payment_method = 'safepay'`. Anas gets a "SAFEPAY PAID" EmailJS notification.
+- **Deploy order:** run `safepay_setup.sql`, set the function secrets, deploy the function, THEN
+  push. Keys never go in this repo:
+  `supabase secrets set SAFEPAY_ENV=sandbox SAFEPAY_PUBLIC_KEY=... SAFEPAY_SECRET_KEY=...`
+  then `supabase functions deploy safepay` from `Mizan/App/`. Going live after approval means
+  swapping to production keys and `SAFEPAY_ENV=production`, no site change.
+- **Known gap:** there is no webhook yet. If a payer closes the tab before Safepay redirects, the
+  lead stays unpaid until they reopen `order.html?ref=...` or Anas checks the Safepay dashboard.

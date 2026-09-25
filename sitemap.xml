@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Only the one real public page is listed. plan.html is a private, per-person,
-     noindex page (token in the URL hash) and must never appear here. -->
+<!-- Public pages only. plan.html (private, per-person, token in the URL hash) and order.html
+     (per-order confirmation) are noindex and must never appear here. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://mizanguide.github.io/mizan_guide/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+  <url><loc>https://quitnafs.github.io/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://quitnafs.github.io/contact.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://quitnafs.github.io/terms.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://quitnafs.github.io/privacy.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://quitnafs.github.io/refund.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://quitnafs.github.io/delivery.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

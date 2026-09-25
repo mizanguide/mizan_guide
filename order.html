@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Order confirmation · Quitnafs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Karla:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="legal.css">
+<style>
+  .status { text-align: center; }
+  .tick { width: 64px; height: 64px; border-radius: 50%; background: var(--sage); color: var(--card); display: grid; place-items: center; font-size: 32px; margin: 0 auto 12px; }
+  .tick.wait { background: var(--hairline); color: var(--text3); }
+  .tick.warn { background: var(--terracotta); }
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps li { counter-increment: s; position: relative; padding-left: 40px; margin-bottom: 14px; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--cream); border: 2px solid var(--sage); color: var(--sage); font-weight: 700; font-size: 13px; display: grid; place-items: center; }
+  .ref { color: var(--terracotta) !important; letter-spacing: 1.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="./">Quitnafs</a><a class="back" href="contact.html">Support</a></header>
+  <main class="doc">
+
+    <div class="status" id="checking">
+      <div class="tick wait">&#8230;</div>
+      <div class="kicker">Order</div>
+      <h1>Confirming your payment</h1>
+      <p>This takes a few seconds. Please keep this page open.</p>
+    </div>
+
+    <div id="paid" hidden>
+      <div class="status">
+        <div class="tick">&#10003;</div>
+        <div class="kicker">Payment received</div>
+        <h1>Your order is confirmed</h1>
+        <p>Thank you. Your 14-day plan is now being built around your answers.</p>
+      </div>
+      <div class="card">
+        <div class="row"><span>Order code</span><b class="ref" id="o-ref"></b></div>
+        <div class="row"><span>Item</span><b>Quitnafs 14-day plan</b></div>
+        <div class="row"><span>Amount paid</span><b id="o-amount"></b></div>
+        <div class="row"><span>Paid with</span><b>Safepay</b></div>
+        <div class="row"><span>Date</span><b id="o-date"></b></div>
+        <div class="row"><span>Plan link goes to</span><b id="o-contact"></b></div>
+      </div>
+      <h2>What happens next</h2>
+      <ol class="steps">
+        <li>Within 24 hours, we send your private plan link to the contact above.</li>
+        <li>Day 1 is waiting on that page. Every next step is ready by 9am Pakistan time.</li>
+        <li>Check in each night, and your next day is built from how it actually went.</li>
+      </ol>
+      <p>Changed your mind? A full refund is available within 7 days of payment, see the <a href="refund.html">Refund Policy</a>. Keep your order code for any question.</p>
+    </div>
+
+    <div id="notpaid" hidden>
+      <div class="status">
+        <div class="tick warn">!</div>
+        <div class="kicker">Not completed</div>
+        <h1 id="np-title">Payment not completed</h1>
+        <p id="np-text">No money was taken. You can try again, your answers are saved.</p>
+      </div>
+      <p style="text-align:center"><button class="btn" id="retry">Pay Rs 1,400 with Safepay</button></p>
+      <p style="text-align:center" id="np-note"></p>
+      <p style="text-align:center">Charged but seeing this? Message us with your order code <b class="ref" id="np-ref"></b> on the <a href="contact.html">contact page</a>.</p>
+    </div>
+
+  </main>
+  <footer class="site">
+    <nav>
+      <a href="./#pricing-section">Pricing</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="refund.html">Refunds &amp; Cancellation</a>
+      <a href="delivery.html">Delivery</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="w">Quitnafs</div>
+    <div class="h">SUPPORT_EMAIL_HERE · Instagram @quitnafs</div>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  // Same public anon key as index.html. The edge function does the real work with its own
+  // service_role key and the Safepay secret, neither of which ever reaches the browser.
+  const SUPABASE_URL = 'https://wxwuxajfnefabiipgptx.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d3V4YWpmbmVmYWJpaXBncHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NjE3MjAsImV4cCI6MjEwNDMzNzcyMH0.3OiKcmOfX4KCp-OjaHdBIo7HJeMUjX_XozxlhUF-3fA';
+  const EMAILJS_PUBLIC_KEY = 'QM5B6uhuH-kM3u-T2';
+  const EMAILJS_SERVICE_ID = 'service_xohz5c2';
+  const EMAILJS_TEMPLATE_ID = 'template_9kl5nrd';
+
+  const params = new URLSearchParams(location.search);
+  const ref = (params.get('ref') || '').toUpperCase();
+  const cancelled = params.get('cancelled') === '1';
+  const $ = (id) => document.getElementById(id);
+
+  async function safepay(action) {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/safepay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ action, ref }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.error || res.status);
+    return out;
+  }
+
+  function show(id) { ['checking', 'paid', 'notpaid'].forEach((x) => { $(x).hidden = x !== id; }); }
+
+  function showPaid(o) {
+    $('o-ref').textContent = o.ref;
+    $('o-amount').textContent = `Rs ${Number(o.amount_pkr || 1400).toLocaleString('en-US')}`;
+    $('o-date').textContent = new Date(o.paid_at || Date.now()).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+    $('o-contact').textContent = o.contact;
+    show('paid');
+    // Tell Anas once per browser, so a refresh of this page does not send a second email.
+    try {
+      const k = 'qn_paid_notified_' + o.ref;
+      if (!localStorage.getItem(k) && window.emailjs) {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          instagram: `SAFEPAY PAID ${o.ref}, ${o.contact}`, email: 'n/a', struggle: 'n/a', timing: 'n/a', duration: 'n/a', tried: 'n/a', more: 'n/a',
+        }).catch(() => {});
+        localStorage.setItem(k, '1');
+      }
+    } catch (e) {}
+  }
+
+  function showNotPaid(title, text) {
+    $('np-ref').textContent = ref || 'not found';
+    if (title) $('np-title').textContent = title;
+    if (text) $('np-text').textContent = text;
+    show('notpaid');
+  }
+
+  async function check() {
+    if (!/^MZ-[A-Z0-9]{5}$/.test(ref)) {
+      $('retry').hidden = true;
+      return showNotPaid('Order not found', 'This link has no valid order code. Start your plan from the home page.');
+    }
+    // Safepay can take a moment to settle after the redirect, so check a few times before saying no.
+    for (let i = 0; i < (cancelled ? 1 : 4); i++) {
+      try {
+        const o = await safepay('verify');
+        if (o.paid) return showPaid(o);
+      } catch (e) {}
+      if (i < 3 && !cancelled) await new Promise((r) => setTimeout(r, 2500));
+    }
+    showNotPaid(cancelled ? 'Payment cancelled' : null, null);
+  }
+
+  $('retry').addEventListener('click', async () => {
+    $('retry').disabled = true;
+    $('np-note').textContent = 'Opening Safepay...';
+    try {
+      const o = await safepay('create');
+      if (o.already_paid) return showPaid(o);
+      location.href = o.url;
+    } catch (e) {
+      $('retry').disabled = false;
+      $('np-note').textContent = 'Could not open Safepay. Please try again in a minute.';
+    }
+  });
+
+  check();
+</script>
+</body>
+</html>

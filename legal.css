@@ -1,0 +1,39 @@
+/* Shared styles for the policy, contact and order pages. Same Sage Botanical tokens as index.html. */
+:root {
+  color-scheme: light only;
+  --sage: #4A6B52; --deep: #35503B; --tint: #8FA890; --terracotta: #C77B4D;
+  --cream: #F2EEE1; --card: #FFFDF7; --ink: #2A2A20; --text2: #5c5347; --text3: #6b6353; --hairline: #ddd6c2;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: var(--cream); color: var(--ink); font-family: 'Karla', sans-serif; line-height: 1.65; }
+.wrap { max-width: 680px; margin: 0 auto; padding: 0 20px; }
+.top { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; border-bottom: 1px solid var(--hairline); }
+.top a.brand { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 26px; color: var(--deep); text-decoration: none; }
+.top a.back { font-weight: 700; font-size: 14px; color: var(--sage); text-decoration: none; }
+.doc { padding: 40px 0 24px; }
+.doc .kicker { font-weight: 700; font-size: 11.5px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--sage); }
+.doc h1 { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 38px; line-height: 1.15; color: var(--deep); margin: 8px 0 6px; }
+.doc .updated { font-size: 13.5px; color: var(--text3); margin: 0 0 28px; }
+.doc h2 { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 23px; color: var(--deep); margin: 32px 0 8px; }
+.doc p, .doc li { font-size: 16px; color: var(--text2); }
+.doc ul { padding-left: 20px; }
+.doc li { margin-bottom: 6px; }
+.doc a { color: var(--sage); font-weight: 700; }
+.doc strong { color: var(--ink); }
+.card { background: var(--card); border: 2px solid var(--hairline); border-radius: 14px; padding: 20px 22px; margin: 20px 0; }
+.card .row { padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+.card .row:last-child { border-bottom: none; }
+.card .row span { display: block; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; color: var(--text3); }
+.card .row b { display: block; font-size: 17px; color: var(--ink); overflow-wrap: anywhere; }
+.card .row b a { color: var(--sage); }
+.btn { display: inline-block; background: var(--sage); color: var(--card); text-decoration: none; font-weight: 700; font-size: 15px;
+  padding: 14px 32px; border-radius: 999px; border: 2px solid var(--sage); cursor: pointer; font-family: 'Karla', sans-serif; }
+.btn:hover { background: var(--deep); border-color: var(--deep); }
+[hidden] { display: none !important; }
+footer.site { border-top: 1px solid var(--hairline); margin-top: 48px; padding: 28px 0 48px; text-align: center; }
+footer.site nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; margin-bottom: 14px; }
+footer.site nav a { font-size: 13.5px; font-weight: 700; color: var(--sage); text-decoration: none; }
+footer.site .w { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px; color: var(--sage); }
+footer.site .h { font-size: 12.5px; color: var(--text3); margin-top: 4px; }
+@media (max-width: 480px) { .doc h1 { font-size: 31px; } }
