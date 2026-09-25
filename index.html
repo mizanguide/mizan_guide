@@ -265,7 +265,7 @@
   .form-note { font-size: 13.5px; color: var(--tint); margin: var(--sp-1) 0 var(--sp-3); }
 
   /* Stepped quiz: one question per screen, identity asked last. The first tap is about the
-     pattern (when, how long), never a confession box, and the Instagram handle only appears
+     pattern (when, how long), never a confession box, and the contact details only appear
      after five answers are already in. Same six fields, same ids, same payload. */
   .quiz { margin-top: var(--sp-4); }
   .quiz .progress {
@@ -468,15 +468,15 @@
         <div class="field"><textarea id="more" name="more" placeholder="Anything else you want us to know"></textarea></div>
       </div>
 
-      <div class="step" data-step="6" data-field="ig">
-        <div class="q">Where should we send your plan?<small>Your private plan link goes here once payment is in.</small></div>
+      <div class="step" data-step="6" data-field="email">
+        <div class="q">Where should we send your plan?<small>Your private plan link goes to this email once payment is in.</small></div>
         <div class="field">
-          <label for="ig">Your Instagram username or email</label>
-          <input type="text" id="ig" name="instagram" placeholder="@yourusername or you@email.com" required>
+          <label for="email">Your email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
         </div>
         <div class="field">
-          <label for="email">Email <span class="hint">(optional, in case a DM does not reach you)</span></label>
-          <input type="email" id="email" name="email" placeholder="you@example.com">
+          <label for="ig">Instagram username <span class="hint">(optional)</span></label>
+          <input type="text" id="ig" name="instagram" placeholder="@yourusername">
         </div>
         <p class="form-note" style="text-align:center">Only we can see what you send here. Nothing is posted or shared.</p>
       </div>
@@ -942,9 +942,12 @@
     e.preventDefault();
     statusEl.textContent = '';
     statusEl.classList.remove('error');
+    // Email is required (it is where the plan link goes, and it builds the email list);
+    // Instagram is optional. The instagram column is NOT NULL, so a skipped handle is sent as ''.
     const ig = document.getElementById('ig').value.trim();
-    if (!ig) {
-      statusEl.textContent = 'Add your Instagram username or email so we can reply.';
+    const emailVal = document.getElementById('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      statusEl.textContent = 'Add a valid email so we can send your plan.';
       statusEl.classList.add('error');
       return;
     }
@@ -954,7 +957,7 @@
     const payload = {
       ref: makeRef(),
       instagram: ig,
-      email: document.getElementById('email').value.trim() || null,
+      email: emailVal,
       struggle: document.getElementById('struggle').value.trim() || null,
       timing: document.getElementById('timing').value.trim() || null,
       duration: document.getElementById('duration').value.trim() || null,
@@ -984,7 +987,7 @@
       // the Supabase row is already saved by this point regardless of what happens here.
       if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
         emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          instagram: `${payload.instagram}, code ${payload.ref}`,
+          instagram: `${payload.email}${payload.instagram ? ' / ' + payload.instagram : ''}, code ${payload.ref}`,
           email: payload.email || 'not given',
           struggle: payload.struggle || 'not given',
           timing: payload.timing || 'not given',
